@@ -23,8 +23,20 @@
   "contributes": {
     "commands": [
       {
+        "command": "tarantool-vscode.init-vs",
+        "title": "Tarantool: Initialize VSCode extension in existing app"
+      },
+      {
         "command": "tarantool-vscode.init",
-        "title": "Tarantool: Initialize environment"
+        "title": "Tarantool: Initialize application (tt)"
+      },
+      {
+        "command": "tarantool-vscode.start",
+        "title": "Tarantool: Start cluster (tt)"
+      },
+      {
+        "command": "tarantool-vscode.stop",
+        "title": "Tarantool: Stop cluster (tt)"
       }
     ],
     "yamlValidation": [

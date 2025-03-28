@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as tt from './tt';
 
 const emmyrc = {
 	"runtime": {
@@ -14,7 +15,7 @@ const emmyrc = {
 };
 
 export function activate(context: vscode.ExtensionContext) {
-	const disposable = vscode.commands.registerCommand('tarantool-vscode.init', () => {
+	context.subscriptions.push(vscode.commands.registerCommand('tarantool-vscode.init-vs', () => {
 		const wsedit = new vscode.WorkspaceEdit();
 		const wsPath = vscode.workspace.workspaceFolders?.at(0)?.uri.fsPath; // gets the path of the first workspace folder
 		if (!wsPath) {
@@ -29,9 +30,11 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 		vscode.workspace.applyEdit(wsedit);
 		vscode.window.showInformationMessage('Created a new file: ' + filePath.toString());
-	});
+	}));
 
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(vscode.commands.registerCommand('tarantool-vscode.init', tt.init));
+	context.subscriptions.push(vscode.commands.registerCommand('tarantool-vscode.start', tt.start));
+	context.subscriptions.push(vscode.commands.registerCommand('tarantool-vscode.stop', tt.stop));
 }
 
 export function deactivate() {}
