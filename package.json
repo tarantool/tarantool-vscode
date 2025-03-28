@@ -24,7 +24,13 @@
     "commands": [
       {
         "command": "tarantool-vscode.init",
-        "title": "Initialize Tarantool environment"
+        "title": "Tarantool: Initialize environment"
+      }
+    ],
+    "yamlValidation": [
+      {
+        "fileMatch": [ "cluster.yml", "cluster.yaml", "config.yml", "config.yaml", "source.yml", "source.yaml" ],
+        "url": "https://download.tarantool.org/tarantool/schema/config.schema.json"
       }
     ]
   },
@@ -55,6 +61,7 @@
     "webpack-cli": "^6.0.1"
   },
   "extensionDependencies": [
-    "tangzx.emmylua"
+    "tangzx.emmylua",
+    "redhat.vscode-yaml"
   ]
 }

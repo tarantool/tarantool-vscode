@@ -4,17 +4,18 @@ Tarantool VSCode Extension helps you to develop Tarantool applications in VSCode
 
 Please, note that this extension uses [EmmyLua extension](https://github.com/EmmyLua/VSCode-EmmyLua) as a backend for Tarantool-specific stuff.
 
+## Features
+
+* Language server support and type annotations for Lua.
+* Configuration schema validation.
+
 ## Usage
 
 That's how you use this extension.
 
 * Install he extension from the VSCode marketplace.
 * Open a Tarantool project in VSCode.
-* Run `Initialize Tarantool environment` command from the command palette (`Ctrl+Shift+P`).
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+* Run `Tarantool: Initialize environment` command from the command palette (`Ctrl+Shift+P`).
 
 ## References
 
