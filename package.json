@@ -3,6 +3,7 @@
   "displayName": "Tarantool VSCode extension",
   "description": "Tarantool VSCode extension.",
   "version": "0.0.1",
+  "icon": "res/icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/georgiy-belyanin/tarantool-vscode"

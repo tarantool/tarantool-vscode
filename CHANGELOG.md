@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `tt` restart and status to the command palette.
 - Added `tt` install Tarantool CE to the command palette.
+- Added plugin icon.
 
 ### Changed
 
