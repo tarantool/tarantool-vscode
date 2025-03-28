@@ -1,8 +1,13 @@
 {
-  "name": "tarantool-vscode",
-  "displayName": "tarantool-vscode",
+  "name": "tarantool",
+  "displayName": "Tarantool VSCode extension",
   "description": "Tarantool VSCode extension.",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/georgiy-belyanin/tarantool-vscode"
+  },
+  "publisher": "tarantool",
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -23,25 +28,33 @@
   "contributes": {
     "commands": [
       {
-        "command": "tarantool-vscode.init-vs",
+        "command": "tarantool.init-vs",
         "title": "Tarantool: Initialize VSCode extension in existing app"
       },
       {
-        "command": "tarantool-vscode.init",
+        "command": "tarantool.init",
         "title": "Tarantool: Initialize application (tt)"
       },
       {
-        "command": "tarantool-vscode.start",
+        "command": "tarantool.start",
         "title": "Tarantool: Start cluster (tt)"
       },
       {
-        "command": "tarantool-vscode.stop",
+        "command": "tarantool.stop",
         "title": "Tarantool: Stop cluster (tt)"
+      },
       }
     ],
     "yamlValidation": [
       {
-        "fileMatch": [ "cluster.yml", "cluster.yaml", "config.yml", "config.yaml", "source.yml", "source.yaml" ],
+        "fileMatch": [
+          "cluster.yml",
+          "cluster.yaml",
+          "config.yml",
+          "config.yaml",
+          "source.yml",
+          "source.yaml"
+        ],
         "url": "https://download.tarantool.org/tarantool/schema/config.schema.json"
       }
     ]
@@ -58,6 +71,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
+    "@types/command-exists": "^1.2.3",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
     "@types/vscode": "^1.98.0",
@@ -75,5 +89,9 @@
   "extensionDependencies": [
     "tangzx.emmylua",
     "redhat.vscode-yaml"
-  ]
+  ],
+  "dependencies": {
+    "command-exists": "^1.2.9",
+    "@octokit/core": "^5"
+  }
 }

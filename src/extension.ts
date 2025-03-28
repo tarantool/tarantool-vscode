@@ -1,5 +1,3 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as tt from './tt';
 
@@ -32,9 +30,9 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage('Created a new file: ' + filePath.toString());
 	}));
 
-	context.subscriptions.push(vscode.commands.registerCommand('tarantool-vscode.init', tt.init));
-	context.subscriptions.push(vscode.commands.registerCommand('tarantool-vscode.start', tt.start));
-	context.subscriptions.push(vscode.commands.registerCommand('tarantool-vscode.stop', tt.stop));
+	context.subscriptions.push(vscode.commands.registerCommand('tarantool.init', tt.init));
+	context.subscriptions.push(vscode.commands.registerCommand('tarantool.start', tt.start));
+	context.subscriptions.push(vscode.commands.registerCommand('tarantool.stop', tt.stop));
 }
 
 export function deactivate() {}
