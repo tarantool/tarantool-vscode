@@ -1,23 +1,8 @@
 import * as vscode from 'vscode';
+import commandExists = require('command-exists');
+
 
 const TerminalLabel = 'Tarantool';
-const Tt = 'tt';
-
-function selectTerminal(): Thenable<vscode.Terminal | undefined> {
-	interface TerminalQuickPickItem extends vscode.QuickPickItem {
-		terminal: vscode.Terminal;
-	}
-	const terminals = vscode.window.terminals;
-	const items: TerminalQuickPickItem[] = terminals.map(t => {
-		return {
-			label: `name: ${t.name}`,
-			terminal: t
-		};
-	});
-	return vscode.window.showQuickPick(items).then(item => {
-		return item ? item.terminal : undefined;
-	});
-}
 
 function getTerminal(): vscode.Terminal {
 	const terminal = vscode.window.terminals.find(t => t.name === TerminalLabel) ||
@@ -31,17 +16,20 @@ function isTerminalRunning(): boolean {
 	return terminals.find(t => t.name === TerminalLabel) !== undefined;
 }
 
-export function init() {
-	const t = getTerminal();
-	t.sendText('tt init');
+function cmd(body: string) {
+	return async () => {
+		commandExists('tt').then(() => {
+			const t = getTerminal();
+			t.sendText('tt ' + body);
+		}).catch(function () {
+			vscode.window.showErrorMessage('TT is not installed');
+		});
+	};
 }
 
-export function start() {
-	const t = getTerminal();
-	t.sendText('tt start -i &');
-}
 
-export function stop() {
-	const t = getTerminal();
-	t.sendText('tt stop -y');
-}
+export const init = cmd('init');
+export const start = cmd('start -i &');
+export const stop = cmd('stop -y');
+export const stat = cmd('status -p');
+export const restart = cmd('restart -y');

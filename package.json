@@ -43,6 +43,13 @@
         "command": "tarantool.stop",
         "title": "Tarantool: Stop cluster (tt)"
       },
+      {
+        "command": "tarantool.stat",
+        "title": "Tarantool: Get cluster status (tt)"
+      },
+      {
+        "command": "tarantool.restart",
+        "title": "Tarantool: Restart cluster (tt)"
       }
     ],
     "yamlValidation": [
