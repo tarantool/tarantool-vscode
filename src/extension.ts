@@ -35,6 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('tarantool.stop', tt.stop));
 	context.subscriptions.push(vscode.commands.registerCommand('tarantool.restart', tt.restart));
 	context.subscriptions.push(vscode.commands.registerCommand('tarantool.stat', tt.stat));
+	context.subscriptions.push(vscode.commands.registerCommand('tarantool.install-ce', tt.installCe));
 }
 
 export function deactivate() {}

@@ -50,6 +50,10 @@
       {
         "command": "tarantool.restart",
         "title": "Tarantool: Restart cluster (tt)"
+      },
+      {
+        "command": "tarantool.install-ce",
+        "title": "Tarantool: Install Tarantool Community Edition (tt)"
       }
     ],
     "yamlValidation": [

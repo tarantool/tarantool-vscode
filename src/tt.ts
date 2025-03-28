@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import commandExists = require('command-exists');
+import { Octokit } from '@octokit/core';
 
+const octokit = new Octokit();
 
 const TerminalLabel = 'Tarantool';
 
@@ -27,9 +29,26 @@ function cmd(body: string) {
 	};
 }
 
+async function getCeVersions(): Promise<string[]> {
+	const res = await octokit.request('GET https://api.github.com/repos/tarantool/tarantool/tags');
+	return res.data.map((tag: { name: string }) => tag.name)
+		.filter((version: string) => version.match(/^\d+\.\d+\.\d+$/));
+}
 
 export const init = cmd('init');
 export const start = cmd('start -i &');
 export const stop = cmd('stop -y');
 export const stat = cmd('status -p');
 export const restart = cmd('restart -y');
+export const installCe = function () {
+	vscode.window.showInformationMessage('Installing Tarantool Community Edition');
+	getCeVersions().then(async versions => {
+		const version = await vscode.window.showQuickPick(versions);
+		if (!version) {return;}
+
+		vscode.window.showInformationMessage('Installing Tarantool Community Edition ' + version);
+		getTerminal().sendText('tt install tarantool ' + version);
+	}).catch(err => {
+		vscode.window.showErrorMessage('Unable to fetch Tarantool version list: ' + err.message);
+	});
+};
