@@ -13,7 +13,7 @@ const emmyrc = {
 };
 
 export function activate(context: vscode.ExtensionContext) {
-	context.subscriptions.push(vscode.commands.registerCommand('tarantool-vscode.init-vs', () => {
+	context.subscriptions.push(vscode.commands.registerCommand('tarantool.init-vs', () => {
 		const wsedit = new vscode.WorkspaceEdit();
 		const wsPath = vscode.workspace.workspaceFolders?.at(0)?.uri.fsPath; // gets the path of the first workspace folder
 		if (!wsPath) {
