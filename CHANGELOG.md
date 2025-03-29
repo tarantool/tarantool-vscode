@@ -15,7 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Now the package is called `tarantool` instead of `tarantool-vscode`.
+- Now the id is `tarantool` instead of `tarantool-vscode` and the package
+  name is simple `Tarantool`.
 
 ### Fixed
 

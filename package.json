@@ -1,7 +1,7 @@
 {
   "name": "tarantool",
-  "displayName": "Tarantool VSCode extension",
-  "description": "Tarantool VSCode extension.",
+  "displayName": "Tarantool",
+  "description": "Develop Tarantool applications with ease",
   "version": "0.0.1",
   "icon": "res/icon.png",
   "repository": {
