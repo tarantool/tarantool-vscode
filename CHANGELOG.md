@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Now the package is called `tarantool` instead of `tarantool-vscode`.
 
+### Fixed
+
+- Removed duplicating `tarantool-emmylua` and GitHub CI from the bundle.
+
 ## [0.0.1] - 28.03.2025
 
 ### Added

@@ -83,6 +83,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
+    "@octokit/core": "^5",
     "@types/command-exists": "^1.2.3",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
@@ -91,6 +92,7 @@
     "@typescript-eslint/parser": "^8.28.0",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1",
+    "command-exists": "^1.2.9",
     "copy-webpack-plugin": "^13.0.0",
     "eslint": "^9.23.0",
     "ts-loader": "^9.5.2",
@@ -101,9 +103,5 @@
   "extensionDependencies": [
     "tangzx.emmylua",
     "redhat.vscode-yaml"
-  ],
-  "dependencies": {
-    "command-exists": "^1.2.9",
-    "@octokit/core": "^5"
-  }
+  ]
 }

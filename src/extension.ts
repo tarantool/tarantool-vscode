@@ -7,7 +7,7 @@ const emmyrc = {
 	},
 	"workspace": {
 		"library": [
-			__dirname + "/Library"
+			__dirname + "/../tarantool-emmylua/Library"
 		]
 	}
 };
