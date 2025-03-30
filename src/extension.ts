@@ -12,30 +12,39 @@ const emmyrc = {
 	}
 };
 
-export function activate(context: vscode.ExtensionContext) {
-	context.subscriptions.push(vscode.commands.registerCommand('tarantool.init-vs', () => {
-		const wsedit = new vscode.WorkspaceEdit();
-		const wsPath = vscode.workspace.workspaceFolders?.at(0)?.uri.fsPath; // gets the path of the first workspace folder
-		if (!wsPath) {
-			vscode.window.showWarningMessage('Please, open project before running this command');
-			return;
-		}
-	
-		const filePath = vscode.Uri.file(wsPath + '/.emmyrc.json');
-		wsedit.createFile(filePath, {
-			ignoreIfExists: true,
-			contents: Buffer.from(JSON.stringify(emmyrc))
-		});
-		vscode.workspace.applyEdit(wsedit);
-		vscode.window.showInformationMessage('Created a new file: ' + filePath.toString());
-	}));
+function initVs() {
+	const wsedit = new vscode.WorkspaceEdit();
+	const wsPath = vscode.workspace.workspaceFolders?.at(0)?.uri.fsPath;
+	if (!wsPath) {
+		vscode.window.showWarningMessage('Please, open project before running this command');
+		return;
+	}
 
-	context.subscriptions.push(vscode.commands.registerCommand('tarantool.init', tt.init));
-	context.subscriptions.push(vscode.commands.registerCommand('tarantool.start', tt.start));
-	context.subscriptions.push(vscode.commands.registerCommand('tarantool.stop', tt.stop));
-	context.subscriptions.push(vscode.commands.registerCommand('tarantool.restart', tt.restart));
-	context.subscriptions.push(vscode.commands.registerCommand('tarantool.stat', tt.stat));
-	context.subscriptions.push(vscode.commands.registerCommand('tarantool.install-ce', tt.installCe));
+	const filePath = vscode.Uri.file(`${wsPath}/.emmyrc.json`);
+	wsedit.createFile(filePath, {
+		ignoreIfExists: true,
+		contents: Buffer.from(JSON.stringify(emmyrc))
+	});
+	vscode.workspace.applyEdit(wsedit);
+	vscode.window.showInformationMessage(`Created a new file: ${filePath.toString()}`);
+}
+
+export function activate(context: vscode.ExtensionContext) {
+	const commands = [
+		{ name: 'init-vs', cb: initVs },
+		{ name: 'init', cb: tt.init },
+		{ name: 'start', cb: tt.start },
+		{ name: 'stop', cb: tt.stop },
+		{ name: 'stat', cb: tt.stat },
+		{ name: 'restart', cb: tt.restart },
+		{ name: 'install-ce', cb: tt.installCe },
+	];
+
+	commands.forEach((command) => {
+		const commandName = `tarantool.${command.name}`;
+		const vsCommand = vscode.commands.registerCommand(commandName, command.cb);
+		context.subscriptions.push(vsCommand);
+	});
 }
 
 export function deactivate() {}
