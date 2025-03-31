@@ -52,6 +52,14 @@ local unnamed_user = { name = 'Unnamed' }
 
 For more examples, refer to [Emmylua documentation](https://emmylua.github.io/annotation.html).
 
+## Contributing
+
+Feel free to open issues on feature requests, wrong type annotations and bugs. If you're dealing with the problem related to LSP we'd appreciate addressing a direct issue to [emmylua-analyzer-rust](https://github.com/CppCXY/emmylua-analyzer-rust) which is used as a language server.
+
+We also appreciate contributions via pull requests.
+
+Thank you for your interest in Tarantool and its development tools!
+
 ## References
 
 * [Tarantool](https://www.tarantool.io/)
