@@ -1,18 +1,18 @@
 import * as vscode from 'vscode';
 import * as tt from './tt';
+import * as fs from 'fs';
 
+const annotationsPaths = [ __dirname + "/Library" ];
 const emmyrc = {
 	"runtime": {
 		"version": "LuaJIT"
 	},
 	"workspace": {
-		"library": [
-			__dirname + "/../tarantool-emmylua/Library"
-		]
+		"library": annotationsPaths
 	}
 };
 
-function initVs() {
+async function initVs() {
 	const wsedit = new vscode.WorkspaceEdit();
 	const wsPath = vscode.workspace.workspaceFolders?.at(0)?.uri.fsPath;
 	if (!wsPath) {
@@ -20,9 +20,16 @@ function initVs() {
 		return;
 	}
 
-	const filePath = vscode.Uri.file(`${wsPath}/.emmyrc.json`);
+	const emmyrcFile = '.emmyrc.json';
+	const filePath = vscode.Uri.file(`${wsPath}/${emmyrcFile}`);
+	if (fs.existsSync(filePath.fsPath)) {
+		const yes = "Yes";
+		const ask = await vscode.window.showInformationMessage(`It seems like there is an existing LSP configuration in ${emmyrcFile} file. Overwrite it?`, yes, "No");
+		if (ask !== yes)
+			{return;}
+	}
 	wsedit.createFile(filePath, {
-		ignoreIfExists: true,
+		overwrite: true,
 		contents: Buffer.from(JSON.stringify(emmyrc))
 	});
 	vscode.workspace.applyEdit(wsedit);
