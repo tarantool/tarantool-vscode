@@ -1,6 +1,7 @@
 # Change Log
 
-All notable changes to the "tarantool-vscode" extension will be documented in this file.
+All notable changes to the "tarantool-vscode" extension will be documented in
+this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -12,12 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `tt` restart and status to the command palette.
 - Added `tt` install Tarantool CE to the command palette.
 - Added plugin icon.
-- Now the extension performs startup checks whether there are Tarantool annotations when it starts.
+- Now the extension performs startup checks whether there are Tarantool
+  annotations when it starts.
 
 ### Changed
 
-- Now the id is `tarantool` instead of `tarantool-vscode` and the package
-  name is simple `Tarantool`.
+- Now the id is `tarantool` instead of `tarantool-vscode` and the package name
+  is simple `Tarantool`.
 
 ### Fixed
 
