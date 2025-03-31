@@ -31,6 +31,27 @@ That's how you use this extension.
 * Open a Tarantool project in VS Code.
 * Run `Tarantool: Initialize VS Code extension in existing app` command from the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS).
 
+You may statically type your Lua functions as follows.
+
+```lua
+---@class user_info
+---@field name string User's name.
+---@field age? number User's age (optional).
+
+---@alias user_tuple [string, number]
+
+---@param tuples user_tuple[]
+---@return user_info[]
+local function deflatten_users(tuples)
+    -- ...
+end
+
+---@type user_info
+local unnamed_user = { name = 'Unnamed' }
+```
+
+For more examples, refer to [Emmylua documentation](https://emmylua.github.io/annotation.html).
+
 ## References
 
 * [Tarantool](https://www.tarantool.io/)
