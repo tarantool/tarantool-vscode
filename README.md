@@ -6,8 +6,6 @@
 
 Tarantool VS Code Extension helps you to develop Tarantool applications in VS Code. It enhances your text editor with completions, suggestions, and snippets.
 
-Please, note that this extension uses [EmmyLua extension](https://github.com/EmmyLua/VSCode-EmmyLua) as a backend for Tarantool-specific stuff.
-
 ---
 
 ## Features
@@ -62,6 +60,6 @@ Thank you for your interest in Tarantool and its development tools!
 
 ## References & acknowledgments
 
-This is an extension for the [Tarantool database](https://www.tarantool.io/) internally using [VS Code EmmyLua extension used as a language server](https://github.com/EmmyLua/VSCode-EmmyLua).
+This is an extension for the [Tarantool database](https://www.tarantool.io/) internally using [VS Code EmmyLua extension as a language server](https://github.com/EmmyLua/VSCode-EmmyLua).
 
 A lot of the initial work has been done by Tarantool community in the [original Tarantool VS Code annotations](https://github.com/vaintrub/vscode-tarantool).
