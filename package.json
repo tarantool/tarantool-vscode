@@ -34,7 +34,11 @@
       },
       {
         "command": "tarantool.init",
-        "title": "Tarantool: Initialize application (tt)"
+        "title": "Tarantool: Initialize tt environment (tt)"
+      },
+      {
+        "command": "tarantool.create",
+        "title": "Tarantool: Create a new app from a template (tt)"
       },
       {
         "command": "tarantool.start",

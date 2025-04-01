@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added plugin icon.
 - Now the extension performs startup checks whether there are Tarantool
   annotations when it starts.
+- Added `tt` create command for creating Tarantool projects from a template.
 
 ### Changed
 

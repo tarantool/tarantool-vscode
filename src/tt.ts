@@ -45,3 +45,22 @@ export const installCe = async () => {
 		vscode.window.showErrorMessage(`Unable to install Tarantool Community Edition: ${err.message}`);
 	}
 };
+export const create = async () => {
+	const templateList = [
+		{ name: 'single_instance', title: 'Single Instance (Tarantool 3.x)' },
+		{ name: 'vshard_cluster', title: 'Vshard cluster (Tarantool 3.x)' },
+		{ name: 'cartridge', title: 'Cartridge (Tarantool 2.x)' }
+	];
+
+	const templateTitles = templateList.map((template) => template.title);
+	const templateTitle = await vscode.window.showQuickPick(templateTitles, { placeHolder: 'Select a template' });
+	if (!templateTitle) {return;}
+
+	const templateName = templateList.find((template) => template.title === templateTitle)?.name;
+	if (!templateName) {return;}
+
+	const name = await vscode.window.showInputBox({ prompt: 'Enter a name for your app' });
+	if (!name) {return;}
+
+	cmd(`create ${templateName} --name ${name}`)();
+};

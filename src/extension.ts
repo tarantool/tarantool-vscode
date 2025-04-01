@@ -57,6 +57,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const commands = [
 		{ name: 'init-vs', cb: initVs },
+		{ name: 'create', cb: tt.create },
 		{ name: 'init', cb: tt.init },
 		{ name: 'start', cb: tt.start },
 		{ name: 'stop', cb: tt.stop },
