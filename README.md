@@ -50,7 +50,7 @@ end
 local unnamed_user = { name = 'Unnamed' }
 ```
 
-For more examples, refer to [Emmylua documentation](https://emmylua.github.io/annotation.html).
+For more examples, refer to [the examples folder](examples/) with tutorials on how to type your Lua code.
 
 ## Contributing
 

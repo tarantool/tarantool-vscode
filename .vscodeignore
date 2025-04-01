@@ -15,3 +15,4 @@ vsc-extension-quickstart.md
 .github/**
 .gitmodules
 tarantool-emmylua/**
+examples/**
