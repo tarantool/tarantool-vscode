@@ -60,9 +60,8 @@ We also appreciate contributions via pull requests.
 
 Thank you for your interest in Tarantool and its development tools!
 
-## References
+## References & acknowledgments
 
-* [Tarantool](https://www.tarantool.io/)
-* [VS Code Emmylua extension](https://github.com/EmmyLua/VSCode-EmmyLua)
-* [Tarantool EmmyLua annotations](https://github.com/georgiy-belyanin/tarantool-emmylua)
-* [Original Tarantool VS Code annotations](https://github.com/vaintrub/vscode-tarantool)
+This is an extension for the [Tarantool database](https://www.tarantool.io/) internally using [VS Code EmmyLua extension used as a language server](https://github.com/EmmyLua/VSCode-EmmyLua).
+
+A lot of the initial work has been done by Tarantool community in the [original Tarantool VS Code annotations](https://github.com/vaintrub/vscode-tarantool).
