@@ -6,14 +6,6 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        include:
-         - {target: linux-x64}
-         - {target: linux-arm64}
-         - {target: darwin-x64}
-         - {target: darwin-arm64}
-
     runs-on: ubuntu-latest
 
     steps:
@@ -30,9 +22,9 @@ jobs:
     - name: Lint
       run: npm run lint
     - name: Package
-      run: npx vsce package -o tarantool-vscode-${{ matrix.target }}.vsix --target ${{ matrix.target }}
+      run: npx vsce package -o tarantool-vscode.vsix
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: Tarantool VSCode ${{ matrix.target }}
-        path: ${{ github.workspace }}/tarantool-vscode*.vsix
+        name: Tarantool VSCode
+        path: ${{ github.workspace }}/tarantool-vscode.vsix
