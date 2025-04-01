@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 01.04.2025
+
 ### Added
 
 - Added `tt` restart and status to the command palette.

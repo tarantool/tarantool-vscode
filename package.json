@@ -2,11 +2,11 @@
   "name": "tarantool",
   "displayName": "Tarantool",
   "description": "Develop Tarantool applications with ease",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "icon": "res/icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/georgiy-belyanin/tarantool-vscode"
+    "url": "https://github.com/tarantool/tarantool-vscode"
   },
   "publisher": "tarantool",
   "engines": {
