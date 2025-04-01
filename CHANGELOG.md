@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Now the id is `tarantool` instead of `tarantool-vscode` and the package name
   is simple `Tarantool`.
 - Tarantool annotations aren't longer used as a submodule.
+- Now initialize the extension command also tries to initialize the extension
+  in the workspace folder in which the opened file is located.
 
 ### Fixed
 

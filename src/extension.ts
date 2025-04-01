@@ -13,10 +13,18 @@ const emmyrc = {
 };
 
 async function initVs() {
+	const file = vscode.window.activeTextEditor?.document.uri.fsPath;
+
 	const wsedit = new vscode.WorkspaceEdit();
-	const wsPath = vscode.workspace.workspaceFolders?.at(0)?.uri.fsPath;
+	const wsFolders = vscode.workspace.workspaceFolders?.map((folder) => folder.uri.fsPath);
+	if (!wsFolders) {
+		vscode.window.showWarningMessage('Please, open a project before running this command');
+		return;
+	}
+	
+	const wsPath = file ? wsFolders.find((folder) => file.startsWith(folder)) : wsFolders.at(0);
 	if (!wsPath) {
-		vscode.window.showWarningMessage('Please, open project before running this command');
+		vscode.window.showWarningMessage('Please, open at least one folder within the workspace');
 		return;
 	}
 
