@@ -52,7 +52,7 @@ For more examples, refer to [the examples folder](examples/) with tutorials on h
 
 ## Contributing
 
-Feel free to open issues on feature requests, wrong type annotations and bugs. If you're dealing with the problem related to LSP we'd appreciate addressing a direct issue to [emmylua-analyzer-rust](https://github.com/CppCXY/emmylua-analyzer-rust) which is used as a language server.
+Feel free to open issues on feature requests, wrong type annotations and bugs. If you're dealing with a problem related to LSP we'd appreciate addressing a direct issue to [the used external Lua Language server](https://github.com/CppCXY/emmylua-analyzer-rust).
 
 We also appreciate contributions via pull requests.
 
@@ -60,6 +60,6 @@ Thank you for your interest in Tarantool and its development tools!
 
 ## References & acknowledgments
 
-This is an extension for the [Tarantool database](https://www.tarantool.io/) internally using [VS Code EmmyLua extension as a language server](https://github.com/EmmyLua/VSCode-EmmyLua).
+This is an extension for the [Tarantool database](https://www.tarantool.io/). It uses [VS Code EmmyLua extension](https://github.com/EmmyLua/VSCode-EmmyLua) with [emmylua-analyzer-rust](https://github.com/CppCXY/emmylua-analyzer-rust) under the hood and [RedHat YAML extension](https://github.com/redhat-developer/vscode-yaml) dependencies as providers of Lua and YAML language servers and extend them with Tarantool-specific annotations.
 
 A lot of the initial work has been done by Tarantool community in the [original Tarantool VS Code annotations](https://github.com/vaintrub/vscode-tarantool).
