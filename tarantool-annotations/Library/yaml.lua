@@ -1,0 +1,156 @@
+---@meta
+
+---# Builtin `yaml` module.
+---
+---The `yaml` module takes strings in [YAML](http://yaml.org/) format and decodes them, or takes a series of non-YAML values and encodes them.
+---
+---The [YAML collection style](http://yaml.org/spec/1.1/#id930798) can be specified with `__serialize`:
+---* `__serialize="sequence"` for a Block Sequence array,
+---* `__serialize="seq"` for a Flow Sequence array,
+---* `__serialize="mapping"` for a Block Mapping map,
+---* `__serialize="map"` for a Flow Mapping map.
+---
+---**Example:**
+---
+---Serializing `'A'` and `'B'` with different `__serialize` values causes different results:
+---
+--- ```tarantoolsession
+--- tarantool> yaml = require('yaml')
+--- ---
+--- ...
+--- 
+--- tarantool> print(yaml.encode(setmetatable({'A', 'B'}, { __serialize="sequence"})))
+--- ---
+--- - A
+--- - B
+--- ...
+--- 
+--- ---
+--- ...
+--- 
+--- tarantool> print(yaml.encode(setmetatable({'A', 'B'}, { __serialize="seq"})))
+--- --- ['A', 'B']
+--- ...
+--- 
+--- ---
+--- ...
+--- 
+--- tarantool> print(yaml.encode({setmetatable({f1 = 'A', f2 = 'B'}, { __serialize="map"})}))
+--- ---
+--- - {'f2': 'B', 'f1': 'A'}
+--- ...
+--- 
+--- ---
+--- ...
+--- ```
+local yaml = {}
+
+---@class yaml.cfg
+---@field encode_max_depth? number (default: 128) Max recursion depth for encoding
+---@field encode_deep_as_nil? boolean (default: false) A flag saying whether to crop tables with nesting level deeper than cfg.encode_max_depth. Not-encoded fields are replaced with one null. If not set, too deep nesting is considered an error.
+---@field encode_invalid_numbers? boolean (deafult: true) A flag saying whether to enable encoding of NaN and Inf numbers
+---@field encode_number_precision? number (default: 14) Precision of floating point numbers
+---@field encode_load_metatables? boolean (default: true) A flag saying whether the serializer will follow __serialize metatable field
+---@field encode_use_tostring? boolean (default: false) A flag saying whether to use tostring() for unknown types
+---@field encode_invalid_as_nil? boolean (default: false) A flag saying whether use NULL for non-recognized types
+---@field encode_sparse_convert? boolean (default: true) A flag saying whether to handle excessively sparse arrays as maps. See detailed description below.
+---@field encode_sparse_ratio? number (default: 2) 1/encode_sparse_ratio is the permissible percentage of missing values in a sparse array.
+---@field encode_sparse_safe? number (default: 10) A limit ensuring that small Lua arrays are always encoded as sparse arrays (instead of generating an error or encoding as a map)
+---@field decode_invalid_numbers? boolean (default: true) A flag saying whether to enable decoding of NaN and Inf numbers
+---@field decode_save_metatables? boolean (default: true) A flag saying whether to set metatables for all arrays and maps
+
+---Set values affecting the behavior of encode and decode functions.
+---
+---**Example #1:**
+---
+---The following code will encode 0/0 as NaN ("not a number") and 1/0 as Inf ("infinity"), rather than returning nil or an error message:
+---
+--- ```lua
+--- yaml = require('yaml')
+--- yaml.cfg{encode_invalid_numbers = true}
+--- x = 0/0
+--- y = 1/0
+--- yaml.encode({1, x, y, 2})
+--- ```
+---
+---The result of the `yaml.encode()` request will look like this:
+---
+--- ```tarantoolsession
+--- tarantool> yaml.encode({1, x, y, 2})
+--- ---
+--- - '[1,nan,inf,2]
+--- ...
+--- ```
+---
+---**Example #2:**
+---
+---To avoid generating errors on attempts to encode unknown data types as
+---userdata/cdata, you can use this code:
+---
+--- ```tarantoolsession
+--- tarantool> httpc = require('http.client').new()
+--- ---
+--- ...
+--- 
+--- tarantool> yaml.encode(httpc.curl)
+--- ---
+--- - error: unsupported Lua type 'userdata'
+--- ...
+---
+--- tarantool> yaml.encode(httpc.curl, {encode_use_tostring=true})
+--- ---
+--- - '"userdata: 0x010a4ef2a0"'
+--- ...
+--- ```
+---
+---**Note:**
+---
+---To achieve the same effect for only one call to `yaml.encode()` (i.e. without changing the configuration permanently), you can use `yaml.encode({1, x, y, 2}, {encode_invalid_numbers = true})`.
+---
+---Similar configuration settings exist for [`json`](lua://json) and [`MsgPack`](lua://msgpack).
+---@param cfg yaml.cfg
+function yaml.cfg(cfg) end
+
+---Convert a Lua object to a YAML string.
+---
+---@param value any either a scalar value or a Lua table value
+---@param cfg? yaml.cfg configuration
+---@return string
+function yaml.encode(value, cfg) end
+
+---Convert a YAML string to a Lua object.
+---
+---@param str string a string formatted as yaml
+---@param cfg? yaml.cfg configuration
+---@return any
+function yaml.decode(str, cfg) end
+
+---A value comparable to Lua "nil" which may be useful as a placeholder in a tuple.
+---
+---**Example:**
+---
+--- ```tarantoolsession
+--- tarantool> yaml = require('yaml')
+--- ---
+--- ...
+--- tarantool> y = yaml.encode({'a', 1, 'b', 2})
+--- ---
+--- ...
+--- tarantool> z = yaml.decode(y)
+--- ---
+--- ...
+--- tarantool> z[1], z[2], z[3], z[4]
+--- ---
+--- - a
+--- - 1
+--- - b
+--- - 2
+--- ...
+--- tarantool> if yaml.NULL == nil then print('hi') end
+--- hi
+--- ---
+--- ...
+--- ```
+yaml.NULL = box.NULL
+
+return yaml

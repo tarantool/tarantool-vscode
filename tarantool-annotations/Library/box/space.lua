@@ -1,0 +1,664 @@
+---@meta
+
+---@class box.space<T, U>
+---@field id integer Ordinal space number. Spaces can be referenced by either name or number
+---@field name string name of the space
+---@field enabled boolean Whether or not this space is enabled. The value is false if the space has no index.
+---@field engine string
+---@field is_sync boolean
+---@field is_local boolean
+---@field temporary boolean
+---@field field_count integer (Default: 0) The required field count for all tuples in this space
+---@field index table<integer | string, box.index> kv and list of indexes of space
+local space_methods = {}
+
+---# Builtin `box.space` submodule.
+---
+---**CRUD operations** in Tarantool are implemented by the `box.space` submodule.
+---
+---It has the data-manipulation functions `select`, `insert`, `replace`, `update`, `upsert`, `delete`, ``get``, `put`. It also has members, such as id, and whether or not a space is enabled.
+---
+---@type { [string]: box.space<any, any> }
+box.space = {}
+
+---Create an index.
+---
+---It is mandatory to create an index for a space before trying to insert tuples into it or select tuples from it.
+---
+---The first created index will be used as the primary-key index, so it must be unique.
+---
+---**Possible errors:**
+---
+---* Too many parts.
+---* Index '...' already exists.
+---* Primary key must be unique.
+---
+---Building or rebuilding a large index will cause occasional [yields](doc://app-cooperative_multitasking) so that other requests will not be blocked.
+---
+---If the other requests cause an illegal situation such as a duplicate key in a unique index, building or rebuilding such index will fail.
+---
+---@param index_name string name of index, which should conform to the rules for object names
+---@param options box.index_options
+function space_methods:create_index(index_name, options) end
+
+---@class box.space.alter_options
+---@field name? string name of the space
+---@field field_count? integer fixed count of fields: for example if field_count=5, it is illegal to insert a tuple with fewer than or more than 5 fields
+---@field format? box.space.format
+---@field is_sync? boolean (Default: false) any transaction doing a DML request on this space becomes synchronous
+---@field temporary? boolean (Default: false) space contents are temporary: changes are not stored in the write-ahead log and there is no replication. Note regarding storage engine: vinyl does not support temporary spaces.
+---@field user? string (Default: current user’s name) name of the user who is considered to be the space’s owner for authorization purposes
+
+---Alter an existing space.
+---
+---*Since 2.5.2*
+---
+---This method changes certain space parameters.
+---
+---**Example:**
+---
+--- ```tarantoolsession
+--- tarantool> s = box.schema.create_space('tester')
+--- ---
+--- ...
+--- tarantool> format = {{name = 'field1', type = 'unsigned'}}
+--- ---
+--- ...
+--- tarantool> s:alter({name = 'tester1', format = format})
+--- ---
+--- ...
+--- tarantool> s.name
+--- ---
+--- - tester1
+--- ...
+--- tarantool> s:format()
+--- ---
+--- - [{'name': 'field1', 'type': 'unsigned'}]
+--- ...
+--- ```
+---
+---@param options box.space.alter_options
+function space_methods:alter(options) end
+
+---Number of bytes in the space.
+---
+---This number, which is stored in Tarantool's internal memory, represents the total number of bytes in all tuples, not including index keys
+---
+---**Example:**
+---
+--- ```tarantoolsession
+--- tarantool> box.space.tester:bsize()
+--- ---
+--- - 22
+--- ...
+--- ```
+---
+---@return integer bytes
+function space_methods:bsize() end
+
+---Return the number of tuples.
+---
+---If compared with [`len()`](box.space.len), this method works slower because `count()` scans the entire space to count the tuples.
+---
+---**Possible errors:**
+---
+---* `ER_TRANSACTION_CONFLICT` if a transaction conflict is detected in the [`MVCC transaction mode`](doc://txn_mode_transaction-manager).
+---
+---**Example:**
+---
+--- ```tarantoolsession
+--- tarantool> box.space.tester:count(2, {iterator='GE'})
+--- ---
+--- - 1
+--- ...
+--- ```
+---
+---@param key? box.tuple<T, U> | scalar
+---@param iterator? box.iterator
+---@return number number_of_tuples
+function space_methods:count(key, iterator) end
+
+
+---@class box.space.field_format
+---@field name? string value may be any string, provided that two fields do not have the same name
+---@field type? tuple_type_name value may be any of allowed types
+---@field is_nullable? boolean
+
+---@alias box.space.format box.space.field_format[]
+---field names and types: See the illustrations of format clauses in the space_object:format() description and in the box.space._space example. Optional and usually not specified.
+
+---Delete a tuple identified by the primary key.
+---
+---:return: the deleted tuple
+---:rtype:  tuple
+---
+---**Possible errors:**
+---
+---* `ER_TRANSACTION_CONFLICT` if a transaction conflict is detected in the [MVCC transaction mode](doc://txn_mode_transaction-manager).
+---
+---**Complexity factors:**
+---
+---* Index size.
+---* Index type
+---
+---**Note regarding storage engine:** vinyl will return `nil`, rather than the deleted tuple.
+---
+---**Example:**
+---
+--- ```tarantoolsession
+--- tarantool> box.space.tester:delete(1)
+--- ---
+--- - [1, 'My first tuple']
+--- ...
+--- tarantool> box.space.tester:delete(1)
+--- ---
+--- ...
+--- tarantool> box.space.tester:delete('a')
+--- ---
+--- - error: 'Supplied key type of part 0 does not match index part type:
+--- expected unsigned'
+--- ...
+--- ```
+---
+---For more usage scenarios and typical errors see [example: using data operations](doc://box_space-operations-detailed-examples).
+---
+---@param key box.tuple<T, U> | tuple_type[] | scalar
+---@return box.tuple<T, U> | nil tuple the deleted tuple
+function space_methods:delete(key) end
+
+---Drop a space.
+---
+---The method is performed in background and doesn’t block consequent requests.
+---
+---**Possible errors:** `space_object` does not exist.
+---
+---**Complexity factors:**
+---* Index size.
+---* Index type.
+---* Number of indexes accessed.
+---* WAL settings.
+---
+---**Example:**
+---
+--- ```lua
+--- box.space.space_that_does_not_exist:drop()
+--- ```
+function space_methods:drop() end
+
+---Search for a tuple in the given space.
+---
+---**Possible errors:**
+---
+---* `space_object` does not exist.
+---* `ER_TRANSACTION_CONFLICT` if a transaction conflict is detected in the [MVCC transaction mode](doc://txn_mode_transaction-manager).
+---
+---**Complexity factors:**
+---
+---* Index size.
+---* Index type.
+---* Number of indexes accessed.
+---* WAL settings.
+---
+---The `box.space...select` function returns a set of tuples as a Lua table; the `box.space...get` function returns at most a single tuple.
+---And it is possible to get the first tuple in a space by appending `[1]`. Therefore `box.space.tester:get{1}` has the same effect as `box.space.tester:select{1}[1]`, if exactly one tuple is found.
+---
+---**Example:**
+---
+--- ```lua
+--- box.space.tester:get{1}
+--- ```
+---
+---**Using field names instead of field numbers:** `get()` can use field names described by the optional [`box.space.format`](lua://box.space.format) clause. This is true because the object returned by `get()` can be used with most of the features described in the [`box.tuple`](box.tuple) description, including [`box.tuple.field_name`](lua://box.tuple.field_name).
+---
+---For example, we can format the `tester` space with a field named `x` and use the name `x` in the index definition:
+---
+--- ```lua
+--- box.space.tester:format({{name='x',type='scalar'}})
+--- box.space.tester:create_index('I',{parts={'x'}})
+--- ```
+---
+---Then, if `get` or `select` retrieves a single tuple, we can reference the field 'x' in the tuple by its name:
+---
+--- ```lua
+--- box.space.tester:get{1}['x']
+--- box.space.tester:select{1}[1]['x']
+--- ```
+---
+---@param key box.tuple<T, U> | tuple_type[] | scalar
+---@return box.tuple<T, U> | nil tuple the tuple whose index key matches key, or nil.
+function space_methods:get(key) end
+
+---Insert a tuple into a space.
+---
+---**Possible errors:**
+---
+---* `ER_TUPLE_FOUND` if a tuple with the same unique-key value already exists.
+---* `ER_TRANSACTION_CONFLICT` if a transaction conflict is detected in the [MVCC transaction mode](doc://txn_mode_transaction-manager).
+---
+---**Example:**
+---
+--- ```tarantoolsession
+--- tarantool> box.space.tester:insert{5000,'tuple number five thousand'}
+--- ---
+--- - [5000, 'tuple number five thousand']
+--- ...
+--- ```
+---
+---@param tuple box.tuple<T, U> | T tuple to be inserted.
+---@return box.tuple<T, U> tuple the inserted tuple
+function space_methods:insert(tuple) end
+
+---Return the number of tuples in the space.
+---
+---If compared with [`count()`](lua://box.space.count), this method works faster because `len()` does not scan the entire space to count the tuples.
+---
+---**Possible errors:**
+---
+--- * `ER_TRANSACTION_CONFLICT` if a transaction conflict is detected in the [MVCC transaction mode](doc://txn_mode_transaction-manager).
+---
+---**Example:**
+---
+--- ```tarantoolsession
+--- tarantool> box.space.tester:len()
+--- ---
+--- - 2
+--- ...
+--- ```
+---
+---**Note regarding storage engine:** vinyl supports `len()` but the result may be approximate.
+---If an exact result is necessary then use [`count()`](lua://box.space.count) or [`pairs():length()`](lua://box.space.pairs).
+---
+---@return number number_of_tuples of tuples in the space.
+function space_methods:len() end
+
+---@alias box.space.replace_trigger<T, U>
+---| fun(old_tuple?: box.tuple<T, U>, new_tuple?: box.tuple<T, U>, space_name?: string): box.tuple<T, U> | nil
+---| fun(old_tuple: box.tuple<T, U>, new_tuple: box.tuple<T, U>, space_name: string, request_type: "INSERT" | "UPDATE" | "REPLACE" | "UPSERT"): box.tuple<T, U> | nil
+---| fun(old_tuple: nil, new_tuple: box.tuple<T, U>, space_name: string, request_type: "INSERT" | "UPDATE" | "REPLACE" | "UPSERT"): box.tuple<T, U> | nil
+---| fun(old_tuple: box.tuple<T, U>, new_tuple: nil, space_name: string, request_type: "DELETE"): box.tuple<T, U> | nil
+
+---Create a "replace trigger". The trigger-function will be executed whenever a replace() or insert() or update() or upsert() or delete() happens to a tuple in <space-name>.
+---
+---@param trigger_func? box.space.replace_trigger<T, U>
+---@param old_trigger_func? box.space.replace_trigger<T, U>
+---@return box.space.replace_trigger<T, U> | nil func the old trigger if it was replaced or deleted
+function space_methods:on_replace(trigger_func, old_trigger_func) end
+
+---Create a “replace trigger”. The trigger-function will be executed whenever a replace() or insert() or update() or upsert() or delete() happens to a tuple in <space-name>.
+---@param trigger_func? box.space.replace_trigger<T, U>
+---@param old_trigger_func? box.space.replace_trigger<T, U>
+---@return box.space.replace_trigger<T, U> | nil func the old trigger if it was replaced or deleted
+function space_methods:before_replace(trigger_func, old_trigger_func) end
+
+---@alias box.space.iterator<T> fun.array_iterator<T>
+---@alias box.space.iterator.param string
+---@alias box.space.iterator.state ffi.cdata*
+
+---Search for a tuple or a set of tuples in the given space, and allow iterating over one tuple at a time.
+---@param key? box.tuple<T, U>|tuple_type[]|scalar value to be matched against the index key, which may be multi-part
+---@param iterator? box.iterator (Default: 'EQ') defines iterator order
+---@return box.space.iterator<T>,
+---@return box.space.iterator.param
+---@return box.space.iterator.state
+function space_methods:pairs(key, iterator) end
+
+---Rename a space.
+---
+---**Example:**
+---
+--- ```tarantoolsession
+--- tarantool> box.space.space55:rename('space56')
+--- ---
+--- ...
+--- tarantool> box.space.space56:rename('space55')
+--- ---
+--- ...
+--- ```
+---
+---@param space_name string
+function space_methods:rename(space_name) end
+
+
+---Insert a tuple into a space.
+---
+---If a tuple with the same primary key already exists, `box.space...:replace()` replaces the existing tuple with a new one.
+---
+---The syntax variants `box.space...:replace()` and `box.space...:put()` have the same effect; the latter is sometimes used to show that the effect is the converse of `box.space...:get()`.
+---
+---**Possible errors:**
+---
+---* `ER_TUPLE_FOUND` if a different tuple with the same unique-key value already exists. (This will only happen if there is a unique secondary index.)
+---* `ER_TRANSACTION_CONFLICT` if a transaction conflict is detected in the [MVCC transaction mode](txn_mode_transaction-manager).
+---
+---**Complexity factors:**
+---
+---* Index size.
+---* Index type.
+---* Number of indexes accessed.
+---* WAL settings.
+---
+---**Example:**
+---
+--- ```lua
+--- box.space.tester:replace{5000, 'tuple number five thousand'}
+--- ```
+---
+---@param box.tuple<T, U> | T tuple to be inserted
+---@return box.tuple<T, U> tuple the inserted tuple
+function space_methods:replace(tuple) end
+
+---Insert a tuple into a space (synonym for [`replace()`](lua://box.space.replace)).
+---
+---@param tuple box.tuple<T, U> | T tuple to be inserted.
+---@return box.tuple<T, U> tuple the inserted tuple
+function space_methods:put(tuple) end
+
+---At the time that a [trigger](doc://triggers) is defined, it is automatically enabled - that is, it will be executed.
+---
+---[Replace](lua://box.space.on_replace) triggers can be disabled with `box.space.{space-name}:run_triggers(false)` and re-enabled with `box.space.{space-name}:run_triggers(true)`.
+---
+---**Example:**
+---
+---The following series of requests will associate an existing function named `F` with an existing space named `T`, associate the function a second time with the same space (so it will be called twice), disable all triggers of `T`, and delete each trigger by replacing with `nil`.
+---
+--- ```tarantoolsession
+--- tarantool> box.space.T:on_replace(F)
+--- tarantool> box.space.T:on_replace(F)
+--- tarantool> box.space.T:run_triggers(false)
+--- tarantool> box.space.T:on_replace(nil, F)
+--- tarantool> box.space.T:on_replace(nil, F)
+--- ```
+---@param flag boolean
+function space_methods:run_triggers(flag) end
+
+---@class box.space.select_options: table
+---@field iterator? box.iterator type of the iterator
+---@field limit? integer maximum number of tuples
+---@field offset? integer number of tuples to skip
+
+---Search for a tuple or a set of tuples in the given space by the primary key.
+---
+---To search by the specific index, use the [`box.index.select`](lua://box.index.select) method.
+---
+---**Note:** this method doesn't yield. For details, [Cooperative multitasking](doc://app-cooperative_multitasking).
+---
+---**Note:** the `after` and `fetch_pos` options are supported for the `TREE` :ref:`index <index-types>` only.
+---
+---**Possible errors:**
+---
+---* No such space.
+---* Wrong type.
+---* `ER_TRANSACTION_CONFLICT` if a transaction conflict is detected in the [`MVCC transaction mode`](doc://txn_mode_transaction-manager).
+---* Iterator position is invalid.
+---
+---**Complexity factors:**
+---
+---* Index size.
+---* Index type.
+---
+---**Examples:**
+---
+---Below are few examples of using `select` with different parameters. To try out these examples, you need to bootstrap a Tarantool instance as described in [using data operations](doc://box_space-operations-detailed-examples).
+---
+--- ```tarantoolsession
+--- -- Insert test data --
+--- tarantool> bands:insert{1, 'Roxette', 1986}
+--- bands:insert{2, 'Scorpions', 1965}
+--- bands:insert{3, 'Ace of Base', 1987}
+--- bands:insert{4, 'The Beatles', 1960}
+--- bands:insert{5, 'Pink Floyd', 1965}
+--- bands:insert{6, 'The Rolling Stones', 1962}
+--- bands:insert{7, 'The Doors', 1965}
+--- bands:insert{8, 'Nirvana', 1987}
+--- bands:insert{9, 'Led Zeppelin', 1968}
+--- bands:insert{10, 'Queen', 1970}
+--- ---
+--- ...
+---
+--- -- Select a tuple by the specified primary key --
+--- tarantool> bands:select(4)
+--- ---
+--- - - [4, 'The Beatles', 1960]
+--- ...
+---
+--- -- Select maximum 3 tuples with the primary key value greater than 3 --
+--- tarantool> bands:select({3}, {iterator='GT', limit = 3})
+--- ---
+--- - - [4, 'The Beatles', 1960]
+--- - [5, 'Pink Floyd', 1965]
+--- - [6, 'The Rolling Stones', 1962]
+--- ...
+---
+--- -- Select maximum 3 tuples after the specified tuple --
+--- tarantool> bands:select({}, {after = {4, 'The Beatles', 1960}, limit = 3})
+--- ---
+--- - - [5, 'Pink Floyd', 1965]
+--- - [6, 'The Rolling Stones', 1962]
+--- - [7, 'The Doors', 1965]
+--- ...
+---
+--- -- Select first 3 tuples and fetch a last tuple's position --
+--- tarantool> result, position = bands:select({}, {limit = 3, fetch_pos = true})
+--- ---
+--- ...
+--- -- Then, pass this position as the 'after' parameter --
+--- tarantool> bands:select({}, {limit = 3, after = position})
+--- ---
+--- - - [4, 'The Beatles', 1960]
+--- - [5, 'Pink Floyd', 1965]
+--- - [6, 'The Rolling Stones', 1962]
+--- ...
+--- ```
+---
+---**Note:** You can get a field from a tuple both by the field number and field name. See example: [using field names instead of field numbers](doc://box_space-get_field_names).
+---
+---@param key box.tuple<T, U> | tuple_type[] | scalar
+---@param options? box.space.select_options
+---@return box.tuple<T, U>[] list the list of tuples
+function space_methods:select(key, options) end
+
+---Deletes all tuples.
+---
+---The method is performed in background and doesn't block consequent requests.
+---
+---**Complexity factors:**
+---
+---* Index size.
+---* Index type.
+---* Number of tuples accessed.
+---
+---The `truncate` method can only be called by the user who created the space, or from within a `setuid` function created by the user who created the space.
+---
+---Read more about `setuid()` functions in the reference for :doc:`/reference/reference_lua/box_schema/func_create`.
+---
+--- **Note:**
+---
+--- Do not call this method within a transaction in Tarantool older than 2.10.0. See :tarantool-issue:`6123` for details.
+---
+--- **Example:**
+--- ```
+--- tarantool> box.space.tester:truncate()
+--- ---
+--- ...
+--- tarantool> box.space.tester:len()
+--- ---
+--- - 0
+--- ...
+--- ```
+function space_methods:truncate() end
+
+---Update a tuple.
+---
+---The `update` function supports operations on fields — assignment, arithmetic (if the field is numeric), cutting and pasting fragments of a field, deleting or inserting a field. Multiple operations can be combined in a single update request, and in this case they are performed atomically and sequentially. Each operation requires specification of a field identifier, which is usually a number. When multiple operations are present, the field number for each operation is assumed to be relative to the most recent state of the tuple, that is, as if all previous operations in a multi-operation update have already been applied. In other words, it is always safe to merge multiple `update` invocations into a single invocation, with no change in semantics.
+---
+---Possible operators are:
+---* `+` for addition. values must be numeric, e.g. unsigned or decimal.
+---* `-` for subtraction. values must be numeric.
+---* `&` for bitwise AND. values must be unsigned numeric.
+---* `|` for bitwise OR. values must be unsigned numeric.
+---* `^` for bitwise :abbr:`XOR(exclusive OR)`. values must be unsigned numeric.
+---* `:` for string splice.
+---* `!` for insertion of a new field.
+---* `#` for deletion.
+---* `=` for assignment.
+---
+---Possible `field_identifiers` are:
+---* Positive field number. The first field is 1, the second field is 2, and so on.
+---* Negative field number. The last field is -1, the second-last field is -2, and so on. In other words: (#tuple + negative field number + 1).
+---* Name. If the space was formatted ([`box.space.format`](lua://box.space.format)), then this can be a string for the field 'name'.
+---
+---**Possible errors:**
+---
+---* It is illegal to modify a primary key field.
+---* `ER_TRANSACTION_CONFLICT` if a transaction conflict is detected in the [`MVCC transaction mode`](doc://txn_mode_transaction-manager).
+---
+---**Complexity factors:**
+---
+---* Index size.
+---* Index type.
+---* Number of indexes.
+---* Accessed, WAL settings.
+---
+---Thus, in the instruction:
+---
+--- ```lua
+--- s:update(44, {{'+', 1, 55 }, {'=', 3, 'x'}})
+--- ```
+---
+---the primary-key value is `44`, the operators are `'+'` and `'='`
+---meaning *add a value to a field and then assign a value to a field*, the
+---first affected field is field `1` and the value which will be added to
+---it is `55`, the second affected field is field `3` and the value
+---which will be assigned to it is `'x'`.
+---
+---**Example:**
+---
+---Assume that initially there is a space named `tester` with a primary-key index whose type is `unsigned`. There is one tuple, with `field[1]` = `999` and `field[2]` = `'A'`.
+---
+---In the update:
+---`box.space.tester:update(999, {{'=', 2, 'B'}})`
+---The first argument is `tester`, that is, the affected space is `tester`.
+---The second argument is `999`, that is, the affected tuple is identified by primary key value = 999.
+---The third argument is `=`, that is, there is one operation — *assignment to a field*.
+---The fourth argument is `2`, that is, the affected field is `field[2]`.
+---The fifth argument is `'B'`, that is, `field[2]` contents change to `'B'`.
+---Therefore, after this update, `field[1]` = `999` and `field[2]` = `'B'`.
+---
+---In the update:
+---`box.space.tester:update({999}, {{'=', 2, 'B'}})`
+---the arguments are the same, except that the key is passed as a Lua table (inside braces). This is unnecessary when the primary key has only one field, but would be necessary if the primary key had more than one field.
+---Therefore, after this update, `field[1]` = `999` and `field[2]` = `'B'` (no change).
+---
+---In the update:
+---`box.space.tester:update({999}, {{'=', 3, 1}})`
+---the arguments are the same, except that the fourth argument is `3`, that is, the affected field is `field[3]`. It is okay that, until now, `field[3]` has not existed. It gets added. Therefore, after this update, `field[1]` = `999`, `field[2]` = `'B'`, `field[3]` = `1`.
+---
+---In the update:
+---`box.space.tester:update({999}, {{'+', 3, 1}})`
+---the arguments are the same, except that the third argument is `'+'`, that is, the operation is addition rather than assignment. Since
+---`field[3]` previously contained `1`, this means we're adding `1` to `1`. Therefore, after this update, `field[1]` = `999`, `field[2]` = `'B'`, `field[3]` = `2`.
+---
+---In the update:
+---`box.space.tester:update({999}, {{'|', 3, 1}, {'=', 2, 'C'}})`
+---the idea is to modify two fields at once. The formats are `'|'` and `=`, that is, there are two operations, OR and assignment. The fourth and fifth arguments mean that `field[3]` gets OR'ed with `1`. The seventh and eighth arguments mean that `field[2]` gets assigned `'C'`.
+---Therefore, after this update, `field[1]` = `999`, `field[2]` = `'C'`, `field[3]` = `3`.
+---
+---In the update:
+---`box.space.tester:update({999}, {{'#', 2, 1}, {'-', 2, 3}})`
+---The idea is to delete `field[2]`, then subtract `3` from `field[3]`.
+---But after the delete, there is a renumbering, so `field[3]` becomes `field[2]` before we subtract `3` from it, and that's why the seventh argument is `2`, not `3`. Therefore, after this update, `field[1]` = `999`, `field[2]` = `0`.
+---
+---In the update:
+---`box.space.tester:update({999}, {{'=', 2, 'XYZ'}})`
+---we're making a long string so that splice will work in the next example.
+---Therefore, after this update, `field[1]` = `999`, `field[2]` = `'XYZ'`.
+---
+---In the update:
+---`box.space.tester:update({999}, {{':', 2, 2, 1, '!!'}})`
+---The third argument is `':'`, that is, this is the example of splice.
+---The fourth argument is `2` because the change will occur in `field[2]`.
+---The fifth argument is 2 because deletion will begin with the second byte.
+---The sixth argument is 1 because the number of bytes to delete is 1.
+---The seventh argument is `'!!'`, because `'!!'` is to be added at this position.
+---Therefore, after this update, `field[1]` = `999`, `field[2]` = `'X!!Z'`.
+---
+---For more usage scenarios and typical errors see [example: using data operations](doc://box_space-operations-detailed-examples).
+---
+---*Since 2.3* a tuple can also be updated via [JSON paths](lua://json.paths).
+---
+---@param key box.tuple<T, U> | tuple_type[] | scalar
+---@param update_operations [box.update_operation, integer | string, tuple_type][]
+---@return box.tuple<T, U> | nil tuple the updated tuple if it was found
+function space_methods:update(key, update_operations) end
+
+---Update or insert a tuple.
+---
+---If there is an existing tuple which matches the key fields of `tuple`, then the request has the same effect as [`box.space.update`](lua://box.space.update) and the `{{operator, field_identifier, value}, ...}` parameter is used.
+---
+---If there is no existing tuple which matches the key fields of `tuple`, then the request has the same effect as [`box.space.insert`](lua://box.space.insert) and the `{tuple}` parameter is used.
+---
+---However, unlike `insert` or `update`, `upsert` will not read a tuple and perform error checks before returning -- this is a design feature which enhances throughput but requires more caution on the part of the user.
+---
+---**Possible errors:**
+---
+---* It is illegal to modify a primary-key field.
+---* It is illegal to use upsert with a space that has a unique secondary
+---index.
+---* `ER_TRANSACTION_CONFLICT` if a transaction conflict is detected in the [`MVCC transaction mode`](doc://txn_mode_transaction-manager).
+---
+---**Complexity factors:**
+---
+---* Index size.
+---* Index type.
+---* Number of indexes accessed.
+---* WAL settings.
+---
+---**Example:**
+--- ```lua
+--- box.space.tester:upsert({12,'c'}, {{'=', 3, 'a'}, {'=', 4, 'b'}})
+--- ```
+---
+---For more usage scenarios and typical errors see [example: using data operations](doc://box_space-operations-detailed-examples).
+---
+---@param tuple box.tuple<T, U> | tuple_type[]
+---@param update_operations [box.update_operation, integer | string, tuple_type][]
+function space_methods:upsert(tuple, update_operations) end
+
+---Convert a map to a tuple instance or to a table.
+---
+---The map must consist of "field name = value" pairs.
+---
+---The field names and the value types must match names and types stated previously for the space, via [`box.space.format`](lua://box.space.format).
+---
+---**Possible errors:**
+---
+---* `space_object` does not exist or has no format.
+---* Unknown field.
+---
+---**Example:**
+---
+--- ```tarantoolsession
+--- -- Create a format with two fields named 'a' and 'b'.
+--- -- Create a space with that format.
+--- -- Create a tuple based on a map consistent with that space.
+--- -- Create a table based on a map consistent with that space.
+--- tarantool> format1 = {{name='a',type='unsigned'},{name='b',type='scalar'}}
+--- ---
+--- ...
+--- tarantool> s = box.schema.create_space('test', {format = format1})
+--- ---
+--- ...
+--- tarantool> s:frommap({b = 'x', a = 123456})
+--- ---
+--- - [123456, 'x']
+--- ...
+--- tarantool> s:frommap({b = 'x', a = 123456}, {table = true})
+--- ---
+--- - - 123456
+--- - x
+--- ...
+--- ```
+---
+---@param tbl U
+---@return box.tuple<T, U>
+function space_methods:frommap(tbl) end

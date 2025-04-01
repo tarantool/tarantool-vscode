@@ -1,3 +1,0 @@
-[submodule "src/tarantool-emmylua"]
-	path = tarantool-emmylua
-	url = https://github.com/georgiy-belyanin/tarantool-emmylua/

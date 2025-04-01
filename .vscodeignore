@@ -14,5 +14,5 @@ vsc-extension-quickstart.md
 **/.vscode-test.*
 .github/**
 .gitmodules
-tarantool-emmylua/**
+tarantool-annotations/**
 examples/**
