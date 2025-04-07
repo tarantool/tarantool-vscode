@@ -30,7 +30,7 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        name: Tarantool VSCode
+        name: tarantool-vscode
         path: ${{ github.workspace }}/tarantool-vscode.vsix
 
   publish:
