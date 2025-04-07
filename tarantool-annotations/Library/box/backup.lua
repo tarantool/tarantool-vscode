@@ -1,6 +1,6 @@
 ---@meta
 
----# Builting `box.backup` submodule
+---# Builtin `box.backup` submodule
 ---
 ---The `box.backup` submodule contains two functions that are helpful for [backup](doc://admin-backups) in certain situations.
 box.backup = {}

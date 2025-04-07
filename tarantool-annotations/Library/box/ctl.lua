@@ -98,5 +98,3 @@ function box.ctl.on_shutdown(trigger_function, old_trigger_function) end
 ---
 ---@param trigger function
 function box.ctl.on_election(trigger) end
-
-return box.ctl

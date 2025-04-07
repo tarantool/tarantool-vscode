@@ -358,7 +358,6 @@ box.index = {
 ---After that, check the `_schema` space again:
 ---
 --- ```tarantoolsession
----
 --- app:instance001> box.space._schema:select{}
 --- ---
 --- - - ['oncebye']
@@ -366,7 +365,6 @@ box.index = {
 --- - ['replicaset_uuid', '72d2d9bf-5d9f-48c4-ba80-9d657e128fee']
 --- - ['version', 3, 1, 0]
 --- ...
----
 --- ```
 ---
 ---To re-execute the function, call the `box.once()` method again:
@@ -384,7 +382,6 @@ box.index = {
 --- - ['replicaset_uuid', '72d2d9bf-5d9f-48c4-ba80-9d657e128fee']
 --- - ['version', 3, 1, 0]
 --- ...
----
 --- ```
 ---
 ---@generic T, R
