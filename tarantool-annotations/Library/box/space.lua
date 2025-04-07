@@ -119,18 +119,16 @@ function space_methods:bsize() end
 function space_methods:count(key, iterator) end
 
 
----@class box.space.field_format
----@field name? string value may be any string, provided that two fields do not have the same name
----@field type? tuple_type_name value may be any of allowed types
----@field is_nullable? boolean
+---@alias box.space.field_format {
+---     name?: string,
+---     type?: tuple_type_name,
+---     is_nullable?: boolean
+---} | [string, tuple_type_name]
 
 ---@alias box.space.format box.space.field_format[]
 ---field names and types: See the illustrations of format clauses in the space_object:format() description and in the box.space._space example. Optional and usually not specified.
 
 ---Delete a tuple identified by the primary key.
----
----:return: the deleted tuple
----:rtype:  tuple
 ---
 ---**Possible errors:**
 ---

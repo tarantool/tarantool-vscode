@@ -7,7 +7,7 @@
 ---* Create, run, and manage fibers.
 ---* Send and receive messages between different processes (i.e. different connections, sessions, or fibers) via channels.
 ---* Use a synchronization mechanism for fibers, similar to "condition variables" and similar to operating-system functions, such as `pthread_cond_wait()` plus `pthread_cond_signal()`.
-fiber = {}
+local fiber = {}
 
 ---Create and start a fiber.
 ---
@@ -30,9 +30,9 @@ fiber = {}
 --- ```
 ---
 ---@async
----@generic T...
----@param func fun(...:any) the function to be associated with the fiber
----@vararg ... what will be passed to function
+---@generic T
+---@param func fun(...: T...) the function to be associated with the fiber
+---@param ... T... what will be passed to function
 ---@return fiber
 function fiber.create(func, ...) end
 
@@ -46,9 +46,9 @@ function fiber.create(func, ...) end
 ---
 ---To join the fiber, you need to make it joinable using `fiber_object:set_joinable()`.
 ---
----@generic T...
+---@generic T
 ---@param func fun(...: T...) the function to be associated with the fiber
----@vararg T... what will be passed to function
+---@param ... T... what will be passed to function
 ---@return fiber
 function fiber.new(func, ...) end
 
@@ -70,7 +70,7 @@ function fiber.self() end
 --- ...
 --- ```
 ---
----@param id number numeric identifier of the fiber.
+---@param id integer numeric identifier of the fiber.
 ---@return fiber
 function fiber.find(id) end
 
@@ -197,11 +197,11 @@ function fiber.status(fiber_object) end
 --- ...
 --- ```
 ---
----@param opts? { backtrace?: boolean, bt?: boolean }
----@return table<number, fiber.info>
+---@param opts? { backtrace?: boolean , bt?: boolean }
+---@return table<integer, fiber.info>
 function fiber.info(opts) end
 
----@return number fiber_id returns current fiber id
+---@return integer fiber_id returns current fiber id
 function fiber.id() end
 
 ---@class fiber.top
@@ -419,21 +419,21 @@ function fiber.check_slice() end
 ---Set a slice for the current fiber execution.
 ---
 ---A fiber slice limits the time period of executing a fiber without yielding control.
----@param slice fiber.slice|number a time period (in seconds) that specifies the error slice
+---@param slice fiber.slice | number a time period (in seconds) that specifies the error slice
 function fiber.set_slice(slice) end
 
 ---Set the default maximum slice for all fibers.
 ---
 ---A fiber slice limits the time period of executing a fiber without yielding control.
 ---
----
----@param slice fiber.slice|number a time period (in seconds) that specifies the error slice
+---@param slice fiber.slice | number a time period (in seconds) that specifies the error slice
 function fiber.set_max_slice(slice) end
 
 ---Extend a slice for the current fiber execution.
----For example, if the default error slice is set using fiber.set_max_slice() to 3 seconds, extend_slice(1)
----extends the error slice to 4 seconds.
----@param slice fiber.slice|number a time period (in seconds) that specifies the error slice
+---
+---For example, if the default error slice is set using `fiber.set_max_slice()` to 3 seconds, `extend_slice(1)` extends the error slice to 4 seconds.
+---
+---@param slice fiber.slice | number a time period (in seconds) that specifies the error slice
 function fiber.extend_slice(slice) end
 
 ---@class fiber: userdata
@@ -498,7 +498,7 @@ fiber_object.storage = {}
 
 ---Make a fiber joinable.
 ---
----A joinable fiber can be waited for using [`fiber_object:join()`](lua://fiber_object.join{.
+---A joinable fiber can be waited for using [`fiber_object:join()`](lua://fiber_object.join).
 ---
 ---The best practice is to call `fiber_object:set_joinable()` before the fiber function begins to execute because otherwise the fiber could become `dead` before `fiber_object:set_joinable()` takes effect.
 ---
@@ -574,12 +574,12 @@ function channel_object:is_empty() end
 
 ---Find out how many messages are in the channel.
 ---
----@return number
+---@return integer
 function channel_object:count() end
 
 ---Returns size of channel.
 ---
----@return number
+---@return integer
 function channel_object:size() end
 
 ---Check if a channel is full.

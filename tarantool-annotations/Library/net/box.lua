@@ -16,11 +16,11 @@ local net_box = {}
 ---@field public _fiber? Fiber
 local conn = {}
 
----@class net.box.request.options
+---@class net.box.request_options
 ---@field public is_async? boolean
 ---@field public timeout? number
 
----@class net.box.call.options
+---@class net.box.call_options
 ---@field timeout number? Timeout of Call
 ---@field is_async boolean? makes request asynchronous
 ---@field return_raw boolean? returns raw msgpack (since version 2.10.0)
@@ -55,7 +55,7 @@ local conn = {}
 ---@async
 ---@param func string
 ---@param args? any[]
----@param opts? net.box.call.options
+---@param opts? net.box.call_options
 ---@return table
 function conn:call(func, args, opts) end
 
@@ -91,7 +91,7 @@ function conn:call(func, args, opts) end
 ---@async
 ---@param expression string
 ---@param args any[]?
----@param opts net.box.call.options?
+---@param opts net.box.call_options?
 ---@return table
 function conn:eval(expression, args, opts) end
 
@@ -152,7 +152,7 @@ function conn:close() end
 ---@return boolean
 function conn:is_connected() end
 
----@class net.box.connect.options
+---@class net.box.connect_options
 ---@field public wait_connected? boolean|number
 ---@field public reconnect_after? number
 ---@field public user? string
@@ -227,7 +227,7 @@ function conn:is_connected() end
 ---
 ---@async
 ---@param endpoint uri_like
----@param options? net.box.connect.options
+---@param options? net.box.connect_options
 ---@return net.box.conn
 function net_box.connect(endpoint, options) end
 
@@ -241,7 +241,7 @@ function net_box.connect(endpoint, options) end
 ---
 ---@async
 ---@param endpoint string
----@param options net.box.connect.options
+---@param options? net.box.connect_options
 ---@return net.box.conn
 function net_box.new(endpoint, options) end
 

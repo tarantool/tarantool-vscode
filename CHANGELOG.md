@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added `iconv` builtin Lua module annotations.
+- Added `jit` builtin Lua module annotations.
+- Added stubs for `box.schema` submodules.
+
+### Changed
+
+- A few typo fixes in the `box` module and its submodules annotations.
+
 ## [0.1.0] - 01.04.2025
 
 ### Added

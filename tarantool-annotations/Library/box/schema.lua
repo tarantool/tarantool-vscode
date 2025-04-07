@@ -135,56 +135,29 @@ function box.schmea.downgrade_versions() end
 ---@param version string
 function box.schmea.downgrade_issues(version) end
 
+---User privileges management.
+---
+---This module hasn't been documented yet.
+---
+---@type any
 box.schema.user = {}
+
+---Role privileges management.
+---
+---This module hasn't been documented yet.
+---
+---@type any
+box.schema.role = {}
+
+---Stored function management.
+---
+---This module hasn't been documented yet.
+---
+---@type any
+box.schema.func = {}
 
 ---@alias box.schema.user.grant_object_type
 ---| "space"
 ---| "function"
 ---| "sequence"
 ---| "role"
-
----@class box.schema.user.grant_options
----@field if_not_exists? boolean
----@field grantor? string
-
----Grant privileges to a user or to another role.
----
----**Function: box.schema.role.grant(role-name, permissions, object-type, object-name [, option])**
----box.schema.role.grant(role-name, permissions, 'universe' [, nil, option])
----box.schema.role.grant(role-name, role-name [, nil, nil, option])
----
----Grant :ref:`privileges <authentication-owners_privileges>` to a role.
----
----:param string role-name: the name of the role
----:param string permissions: one or more :ref:`permissions <access_control_list_privileges>` to grant to the role (for example, `read` or `read,write`)
----:param string object-type: a database :ref:`object type <access_control_list_objects>` to grant permissions to (for example, `space`, `role`, or `function`)
----:param string object-name: the name of a database object to grant permissions to
----:param table option: `if_not_exists` = `true|false` (default = `false`) - boolean;
----`true` means there should be no error if the role already
----has the privilege
----
----The role must exist, and the object must exist.
----
----**Variation:** instead of `object-type, object-name` say `universe`
----which means 'all object-types and all objects'. In this case, object name is omitted.
----
----**Variation:** instead of `permissions, object-type, object-name` say
----`role-name` -- to grant a role to a role.
----
----**Example:**
----
---- ```lua
---- -- Grant read/write privileges to a role --
---- box.schema.role.grant('books_space_manager', 'read,write', 'space', 'books')
---- -- Grant write privileges to a role --
---- box.schema.role.grant('writers_space_reader', 'read', 'space', 'writers')
---- ```
----
----@param user_name string
----@param priv string
----@param object_type box.schema.user.grant_object_type
----@param object_name? string
----@param options? box.schema.user.grant_options
----@overload fun(user_name: string, priv: string, grant_object_type: "universe", options?: box.schema.user.grant_options?)
----@overload fun(user_name: string, role: string, options?: box.schema.user.grant_options?)
-function box.schema.user.grant(user_name, priv, object_type, object_name, options) end

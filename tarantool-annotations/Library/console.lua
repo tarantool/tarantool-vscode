@@ -1,6 +1,4 @@
 ---@meta
---luacheck: ignore
---TODO:
 
 ---# Builtin `console` module
 ---
