@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `jit` builtin Lua module annotations.
 - Added stubs for `box.schema` submodules.
 
-### Changed
+### Fixed
 
 - A few typo fixes in the `box` module and its submodules annotations.
 
