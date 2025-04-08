@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Now the minimum required VS Code version is 1.88.0 making it possible to
+  install the extension to the apps based on the older version of VS Code like
+  Cursor.
+
 ## [0.1.1] - 07.04.2025
 
 ### Added
