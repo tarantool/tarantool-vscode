@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 08.04.2025
+
 ### Changed
 
 - Now the minimum required VS Code version is 1.88.0 making it possible to
