@@ -38,7 +38,22 @@ jobs:
     needs: [build]
     if: success() && startsWith(github.ref, 'refs/tags/')
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
-      - run: npx vsce publish --packagePath $(find tarantool-vscode* -iname "*.vsix")
+      - name: Publish
+        run: npx vsce publish --packagePath $(find tarantool-vscode* -iname "*.vsix")
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      - id: release_vars
+        run: |
+          CHGLOG=CHANGELOG.md;
+          X=$(grep -n "^## \[[0-9]" $CHGLOG | cut -f1 -d: | head -1);
+          Y=$(grep -n "^## \[[0-9]" $CHGLOG | cut -f1 -d: | head -2 | tail -1);
+          awk -v x=$X -v y=$Y 'NR > x && NR < y' $CHGLOG > changelog-latest.md;
+          echo "artifact=$(find tarantool-vscode* -iname '*.vsix' | xargs)" >> "$GITHUB_OUTPUT"
+      - name: Draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: changelog-latest.md
+          draft: true
+          files: ${{ steps.release_vars.outputs.artifact }}
