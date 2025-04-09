@@ -402,7 +402,7 @@ function datetime_obj:add(input) end
 
 ---Modify an existing datetime object by subtracting values of the input argument.
 ---
----See also: `interval_arithm`. The substraction is performed taking `tzdata` into account, when `tzoffset` or `tz` fields are set, see the `timezone`.
+---See also: `interval_arithm`. The subtraction is performed taking `tzdata` into account, when `tzoffset` or `tz` fields are set, see the `timezone`.
 ---
 ---**Example:**
 ---

@@ -190,6 +190,6 @@ function config:info(version) end
 ---@param uri_type 'peer' | 'sharding'
 ---@param opts { instance?: string }
 ---@return uri
-function config:instace_uri(uri_type, opts) end
+function config:instance_uri(uri_type, opts) end
 
 return config

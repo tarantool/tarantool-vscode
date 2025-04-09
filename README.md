@@ -16,7 +16,7 @@ This extension offers the following features.
 
 * Static type checks and documentation for the most popular Lua and Tarantool builtin modules.
 * Cluster configuration schema validation for Tarantool 3.0+.
-* [tt cluster management utility](https://github.com/tarantool/tt) inside the command pallete.
+* [tt cluster management utility](https://github.com/tarantool/tt) inside the command palette.
 * Other auxiliary commands, e.g. install Tarantool of a specific version right from VS Code.
 
 ---

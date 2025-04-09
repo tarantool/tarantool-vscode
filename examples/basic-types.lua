@@ -86,7 +86,7 @@ local b_new = b
 local b_name = b[1] -- Inferred as `string`.
 local b_age = b[2] -- Inferred as `number`.
 
--- Aliases might be mutiline. E.g. they can be used for enumerations.
+-- Aliases might be multiline. E.g. they can be used for enumerations.
 
 ---@alias crud_operation
 ---| 'create' # Create an element. Note that `#` is required for a comment.
