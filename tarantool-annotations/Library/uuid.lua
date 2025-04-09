@@ -65,17 +65,17 @@ function uuid.bin(byte_order) end
 ---@return string uuid 16-byte string
 function uuid_obj:bin(byte_order) end
 
----Get UUID as 36-byte hexademical string.
+---Get UUID as 36-byte hexadecimal string.
 ---
 ---@return string uuid 36-byte binary string
 function uuid.str() end
 
----Convert UUID to a 36-byte hexademical string.
+---Convert UUID to a 36-byte hexadecimal string.
 ---
 ---@return string uuid 36-byte binary string
 function uuid_obj:str() end
 
----Convert hexademical 36-byte string to an UUID object.
+---Convert hexadecimal 36-byte string to an UUID object.
 ---
 ---@param uuid_str string UUID in 36-byte hexadecimal string
 ---@return uuid uuid converted UUID

@@ -144,7 +144,7 @@ function fiber.yield() end
 --- ```
 ---
 ---@param fiber_object? fiber
----@return "running" | "dead" | "supspected"
+---@return "running" | "dead" | "suspected"
 function fiber.status(fiber_object) end
 
 ---@class fiber.info

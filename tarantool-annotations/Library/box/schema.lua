@@ -126,14 +126,14 @@ function box.schema.downgrade(version) end
 ---To learn how to downgrade a database to the specified Tarantool version, see [`box.schema.downgrade()`](lua://box.schema.downgrade).
 ---
 ---@see box.schema.downgrade
-function box.schmea.downgrade_versions() end
+function box.schema.downgrade_versions() end
 
 ---Return a list of downgrade issues for the specified Tarantool version.
 ---
 ---To learn how to downgrade a database to the specified Tarantool version, see [`box.schema.downgrade()`](lua://box.schema.downgrade).
 ---
 ---@param version string
-function box.schmea.downgrade_issues(version) end
+function box.schema.downgrade_issues(version) end
 
 ---User privileges management.
 ---

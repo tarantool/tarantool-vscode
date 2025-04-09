@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed a few typos in various Tarantool builtin modules caught up by automatic
+  spell checking.
+
 ## [0.1.2] - 08.04.2025
 
 ### Changed

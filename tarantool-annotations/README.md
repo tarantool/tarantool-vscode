@@ -192,7 +192,7 @@ local function process_tuple(t)
     return {t[1], t[2], t[3] + 1000}
 end
 
--- Warning: wrong arument type.
+-- Warning: wrong argument type.
 local tuple_1 = process_tuple({1, 2, 3})
 -- Ok.
 local tuple_2 = process_tuple({1, 'Stan', 1000})

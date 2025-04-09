@@ -48,7 +48,7 @@ local yaml = {}
 ---@class yaml.cfg
 ---@field encode_max_depth? number (default: 128) Max recursion depth for encoding
 ---@field encode_deep_as_nil? boolean (default: false) A flag saying whether to crop tables with nesting level deeper than cfg.encode_max_depth. Not-encoded fields are replaced with one null. If not set, too deep nesting is considered an error.
----@field encode_invalid_numbers? boolean (deafult: true) A flag saying whether to enable encoding of NaN and Inf numbers
+---@field encode_invalid_numbers? boolean (default: true) A flag saying whether to enable encoding of NaN and Inf numbers
 ---@field encode_number_precision? number (default: 14) Precision of floating point numbers
 ---@field encode_load_metatables? boolean (default: true) A flag saying whether the serializer will follow __serialize metatable field
 ---@field encode_use_tostring? boolean (default: false) A flag saying whether to use tostring() for unknown types
