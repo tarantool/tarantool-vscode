@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import * as tt from './tt';
 import * as fs from 'fs';
+import * as os from 'os';
+import * as _ from 'lodash';
 
 const annotationsPaths = [
 	__dirname + "/Library",
@@ -14,6 +16,31 @@ const emmyrc = {
 		"library": annotationsPaths
 	}
 };
+const emmyrcFile = '.emmyrc.json';
+
+async function initGlobalEmmyrc() {
+	const globalEmmyrcPath = `${os.homedir()}/${emmyrcFile}`;
+
+	if (!fs.existsSync(globalEmmyrcPath)) {
+		fs.writeFileSync(globalEmmyrcPath, JSON.stringify(emmyrc, undefined, 2));
+		vscode.window.showInformationMessage(`Initialized ${globalEmmyrcPath} with Tarantool-specific settings`);
+		return;
+	}
+
+	const f = fs.readFileSync(globalEmmyrcPath, 'utf8');
+	const existingEmmyrc = JSON.parse(f);
+	const upToDate = _.isMatch(existingEmmyrc, emmyrc);
+	if (upToDate) {
+		vscode.window.showInformationMessage(`${globalEmmyrcPath} is up to date`);
+		return;
+	}
+
+	// TODO: Don't miss user-defined libraries.
+	const mergedEmmyrc = _.merge(existingEmmyrc, emmyrc);
+
+	fs.writeFileSync(globalEmmyrcPath, JSON.stringify(mergedEmmyrc, undefined, 2));
+	vscode.window.showInformationMessage(`Updated existing ${globalEmmyrcPath} with actual Tarantool-specific configuration`);
+}
 
 async function initVs() {
 	const file = vscode.window.activeTextEditor?.document.uri.fsPath;
@@ -31,7 +58,6 @@ async function initVs() {
 		return;
 	}
 
-	const emmyrcFile = '.emmyrc.json';
 	const filePath = vscode.Uri.file(`${wsPath}/${emmyrcFile}`);
 	if (fs.existsSync(filePath.fsPath)) {
 		const yes = "Yes";
@@ -41,7 +67,7 @@ async function initVs() {
 	}
 	wsedit.createFile(filePath, {
 		overwrite: true,
-		contents: Buffer.from(JSON.stringify(emmyrc))
+		contents: Buffer.from(JSON.stringify(emmyrc, undefined, 2))
 	});
 	vscode.workspace.applyEdit(wsedit);
 	vscode.window.showInformationMessage(`Created a new file: ${filePath.toString()}`);
@@ -65,6 +91,8 @@ export function activate(context: vscode.ExtensionContext) {
 	if (!checkOnStartup()) {
 		return;
 	}
+
+	initGlobalEmmyrc();
 
 	const commands = [
 		{ name: 'init-vs', cb: initVs },
