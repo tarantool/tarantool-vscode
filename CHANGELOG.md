@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Now the extension automatically setups Tarantool annotations without need to
+  explicitly execute any commands like `initialize VS Code extension`.
+
 ## [0.1.3] - 14.04.2025
 
 ### Added
