@@ -2,7 +2,10 @@ import * as vscode from 'vscode';
 import * as tt from './tt';
 import * as fs from 'fs';
 
-const annotationsPaths = [ __dirname + "/Library" ];
+const annotationsPaths = [
+	__dirname + "/Library",
+	__dirname + "/Rocks"
+];
 const emmyrc = {
 	"runtime": {
 		"version": "LuaJIT"
