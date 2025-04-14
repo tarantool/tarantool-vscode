@@ -10,7 +10,7 @@
 ---@field id? integer (Default: last index’s id + 1) unique identifier
 ---@field unique? boolean (Default: true) index is unique
 ---@field if_not_exists? boolean (Default: false) no error if duplicate name
----@field parts? box.index_part_def[] field numbers + types
+---@field parts? (box.index_part_def[] | string[]) field numbers + types
 ---@field dimension? integer (Default: 2) affects RTREE only
 ---@field distance? "euclid" | "manhattan" (Default: euclid) affects RTREE only
 ---@field bloom_fpr? number (Default: vinyl_bloom_fpr) affects vinyl only

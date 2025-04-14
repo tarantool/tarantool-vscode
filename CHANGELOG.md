@@ -8,10 +8,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Builtin `buffer` module definitions.
+- Builtin `csv` module definitions.
+- Partial `fun` module definitions.
+- Builtin `http.client` module definitions.
+- Builtin `errno` module definitions.
+- Builtin `strict` module definitions.
+- Partial `vshard` rock definitions.
+- `box.execute()` documentation used for evaluating SQL statements.
+- `box.space.*:format()` documentation and annotations.
+- `box.schema.role` and `box.schema.user` documentation and type annotations.
+- Annotations on a few supplementary spaces like `box.schema._cluster`.
+
+### Changed
+
+- Tightened some of the `box` `number` types to `integer`.
+- Tightened some of the `string` `number` types to `integer`.
+
 ### Fixed
 
-- Fixed a few typos in various Tarantool builtin modules caught up by automatic
-  spell checking.
+- A `box.atomic()` overload has now proper variadic arguments.
+- `box.tuple` now doesn't issue diagnostics on missing field.
+- Missing `fio` file handle `:read()` overload.
+- A few typos in various Tarantool builtin modules caught up by automatic spell
+  checking.
+- Marked `vshard.router.call*` arguments and options optional.
+- Added missing `map`, `any`, `double` tuple type names.
+- Overloads of `box.space.*:format()` are now resolved properly.
 
 ## [0.1.2] - 08.04.2025
 

@@ -184,7 +184,7 @@ function box.rollback_to_savepoint(savepoint) end
 ---@param tx_function? fun(...: T...): R...
 ---@param ... T...
 ---@return R... retvals The result of the function passed to `atomic()` as an argument.
----@overload fun(tx_function: fun(...: T...): R..., ...: T...): R...
+---@overload fun(tx_function: (fun(...: T...): R...), ...: T...): R...
 function box.atomic(opts, tx_function, ...) end
 
 ---@alias box.on_commit_iterator fun():(number, box.tuple|nil, box.tuple|nil, number) request_id, old_tuple, new_tuple, space_id
@@ -456,7 +456,7 @@ function box.snapshot() end
 ---@class box.watcher
 local watcher = {}
 
----unregisters the watcher
+---Unregisters the watcher.
 function watcher:unregister() end
 
 ---Update the value of a particular key and notify all key watchers of the update.
@@ -560,3 +560,101 @@ function box.watch_once(key, func) end
 ---| '!' # Insertion of a new field.
 ---| '#' # Deletion.
 ---| '=' # Assignment.
+
+---Execute the SQL statement.
+---
+---There are two ways to pass extra parameters to `box.execute()`:
+---
+---* The first way, which is the preferred way, is to put placeholders in the string, and pass a second argument, an `extra-parameters` table. A placeholder is either a question mark "?", or a colon ":" followed by a name. An extra parameter is any Lua expression.
+---
+---If placeholders are question marks, then they are replaced by `extra-parameters` values in corresponding positions. That is, the first `?` is replaced by the first extra parameter, the second `?` is replaced by the second extra parameter, and so on.
+---
+---If placeholders are `:names`, then they are replaced by `extra-parameters` values with corresponding names.
+---
+---**Examples:**
+---
+---For example, this request that contains literal values `1` and `'x'`:
+---
+--- ```lua
+--- box.execute([[INSERT INTO tt VALUES (1, 'x');]]);
+--- ```
+---
+---... is the same as the request below containing two question-mark placeholders (`?` and `?`) and a two-element `extra-parameters` table:
+---
+--- ```lua
+--- x = {1,'x'}
+--- box.execute([[INSERT INTO tt VALUES (?, ?);]], x);
+--- ```
+---
+---... and is the same as this request containing two `:name` placeholders (`:a` and `:b`) and a two-element `extra-parameters` table with elements named "a" and "b":
+---
+--- ```lua
+--- box.execute([[INSERT INTO tt VALUES (:a, :b);]], {{[':a']=1},{[':b']='x'}})
+--- ```
+---
+---* The second way is to concatenate strings. For example, the Lua script below inserts 10 rows with different primary-key values into table `t`:
+---
+--- ```lua
+--- for i=1,10,1 do
+---     box.execute("insert into t values (" .. i .. ")")
+--- end
+--- ```
+---
+---When creating SQL statements based on user input, application developers should beware of `SQL injection <https://en.wikipedia.org/wiki/SQL_injection>`_.
+---
+---Since `box.execute()` is an invocation of a Lua function, it either causes an error message or returns a value.
+---
+---For some statements the returned value contains a field named `rowcount`, for example:
+---
+--- ```tarantoolsession
+--- tarantool> box.execute([[CREATE TABLE table1 (column1 INT PRIMARY key, column2 VARCHAR(10));]])
+--- ---
+--- - rowcount: 1
+--- ...
+--- tarantool> box.execute([[INSERT INTO table1 VALUES (55,'Hello SQL world!');]])
+--- ---
+--- - rowcount: 1
+--- ...
+--- ```
+---
+---For statements that cause generation of values for PRIMARY KEY AUTOINCREMENT columns, there is a field named `autoincrement_id`.
+---
+---For SELECT or PRAGMA statements, the returned value is a *result set*, containing a field named `metadata` (a table with column names and Tarantool/NoSQL type names) and a field named `rows` (a table with the contents of each row).
+---
+---For example, for a statement `SELECT "x" FROM t WHERE "x"=5;` where `"x"` is an INTEGER column and there is one row, a display on the Tarantool client might look like this:
+---
+--- ```tarantoolsession
+--- tarantool> box.execute([[SELECT "x" FROM t WHERE "x"=5;]])
+--- ---
+--- - metadata:
+---   - name: x
+---     type: integer
+---   rows:
+---   - [5]
+--- ...
+--- ```
+---
+---For a look at raw format of SELECT results, see [Binary protocol -- responses for SQL](doc://box_protocol-sql_protocol).
+---
+---The order of components within a map is not guaranteed.
+---
+---If `sql_full_metadata` in the [_session_settings](doc://box_space-session_settings) system table is TRUE, then result set metadata may include these things in addition to `name` and `type`:
+---
+---* `collation` (present only if COLLATE clause is specified for a STRING) =
+---* `is_nullable` (present only if the [select list](doc://sql_select_list) specified a base table column and nothing else) = false if column was defined as [NOT NULL](doc://sql_nulls), otherwise true.
+---* `is_autoincrement` (present only if the select list specified a base table column and nothing else) = true if column was defined as [PRIMARY KEY AUTOINCREMENT](doc://sql_table_constraint_def),
+---* `span` (always present) = the original expression in a select list, which often is the same as `name` if the select list specifies a column name and nothing else, but otherwise differs, for example, after `SELECT x+55 AS x FROM t;` the `name` is X and the `span` is x+55. If `span` and `name` are the same then the content is MP_NIL.
+---
+---Alternative: if you are using the Tarantool server as a client, you can switch languages as follows:
+---
+--- ```none
+--- \set language sql
+--- \set delimiter ;
+--- ```
+---
+---Afterwards, you can enter any SQL statement directly without needing `box.execute()`.
+---
+---@param sql_statement string statement, which should conform to
+---@param extra_parameters table optional table for placeholders in the statement [the rules for SQL grammar](doc://sql_statements_and_clauses)
+---@return any query_result depends on statement
+function box.execute(sql_statement, extra_parameters) end

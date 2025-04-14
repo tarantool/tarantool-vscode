@@ -10,7 +10,7 @@
 ---@field uuid string UUID of the replicaset this instance belong.
 
 ---@class box.info.synchro.queue: table
----@field owner number ID of the replica that owns the synchronous transaction queue.
+---@field owner integer ID of the replica that owns the synchronous transaction queue.
 ---@field term number Current queue term. It contains the term of the last PROMOTE request.
 ---@field len number The number of entries that are currently waiting in the queue.
 ---@field busy boolean The boolean value is true when the instance is processing or writing some system request that modifies the queue (for example, PROMOTE, CONFIRM, or ROLLBACK).

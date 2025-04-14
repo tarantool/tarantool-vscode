@@ -97,7 +97,7 @@ This path lua-language-server
         That's it, you now have NeoVim configured for using it with Tarantool annotations.
     - __JetBrains__:
         Install [SumnekoLua](https://plugins.jetbrains.com/plugin/22315-sumnekolua) from the plugin marketplace.
-2. Configure LSP to find annotations Library. Create `.luarc.json` inside you Tarantool app (or within the Tarantool sources if you want to use the annotations within the Tarantool repository) with the following contents.
+2. Configure LSP to find annotations. Create `.luarc.json` inside you Tarantool app (or within the Tarantool sources if you want to use the annotations within the Tarantool repository) with the following contents.
 ```json
 {
   "runtime": {
@@ -105,7 +105,8 @@ This path lua-language-server
   },
   "workspace": {
     "library": [
-      "<path to the cloned repository>/Library"
+      "<path to the cloned repository>/Library",
+      "<path to the cloned repository>/Rocks"
     ]
   }
 }
@@ -142,7 +143,8 @@ git clone https://github.com/georgiy-belyanin/tarantool-emmylua
   },
   "workspace": {
     "library": [
-      "<path to the cloned repository>/Library"
+      "<path to the cloned repository>/Library",
+      "<path to the cloned repository>/Rocks"
     ]
   }
 }
@@ -257,29 +259,27 @@ For more information on using LSP refer to the [project's documentation](https:/
         + [x] `error`
         + [x] `index` (partial)
         + [x] `info`
-        + [x] `schema` (partial, `user`/`role` is missing)
+        + [x] `schema` (partial, `func` is missing)
         + [x] `session`
         + [x] `slab`
         + [x] `space` (partial)
         + [x] `stat` (partial)
         + [x] `tuple`
-    - [ ] `buffer`
+    - [x] `buffer`
     - [x] `clock`
     - [x] `console`
-    - [ ] `config`
+    - [x] `config`
     - [ ] `crypto`
-    - [ ] `csv`
+    - [x] `csv`
     - [x] `datetime`
     - [x] `decimal`
     - [ ] `digest`
-    - [ ] `errno`
+    - [x] `errno`
     - [ ] `experimental.connpool`
     - [x] `fiber`
     - [x] `fio`
-    - [ ] `fun`
-    - [ ] `http`
-        + [ ] `client`
-        + [ ] `server`
+    - [x] `fun` (partial)
+    - [x] `http.client`
     - [x] `iconv`
     - [x] `jit`
     - [x] `json` (partial)
@@ -290,7 +290,7 @@ For more information on using LSP refer to the [project's documentation](https:/
     - [ ] `pickle`
     - [ ] `popen`
     - [ ] `socket`
-    - [ ] `strict`
+    - [x] `strict`
     - [x] `string`
     - [ ] `tarantool`
     - [x] `uri`
@@ -306,7 +306,7 @@ For more information on using LSP refer to the [project's documentation](https:/
     - [ ] `luatest`
     - [ ] `metrics`
     - [ ] `queue`
-    - [ ] `vshard`
+    - [x] `vshard` (partial)
 
 ## Contributing
 
