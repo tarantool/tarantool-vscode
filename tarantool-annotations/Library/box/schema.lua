@@ -136,18 +136,234 @@ function box.schema.downgrade_versions() end
 function box.schema.downgrade_issues(version) end
 
 ---User privileges management.
----
----This module hasn't been documented yet.
----
----@type any
 box.schema.user = {}
 
+---Create a user.
+---
+---**Note:** The maximum number of users is 32.
+---
+---**Examples:**
+---
+--- ```lua
+--- box.schema.user.create('testuser')
+--- ```
+---
+---@param username string
+---@param options? { if_not_exists?: boolean, password?: string }
+function box.schema.user.create(username, options) end
+
+---Drop a user.
+---
+---**Examples:**
+---
+--- ```lua
+--- box.schema.user.drop('testuser')
+--- ```
+---
+---@param username string
+---@param options? { if_exists?: boolean }
+function box.schema.user.drop(username, options) end
+
+---@alias box.schema.privileges.permissions
+---| 'read' # Allows reading data of the specified object. For example, this permission can be used to allow a user to select data from the specified space.
+---| 'write' # Allows updating data of the specified object. For example, this permission can be used to allow a user to modify data in the specified space.
+---| 'create' # Allows creating objects of the specified type. For example, this permission can be used to allow a user to create new spaces. Note this permission requires read and write access to certain system spaces.
+---| 'alter' # Allows altering objects of the specified type. Note this permission requires read and write access to certain system spaces.
+---| 'drop' # Allows dropping objects of the specified type. Note this permission requires read and write access to certain system spaces.
+---| 'execute' # For role, allows using the specified role. For other object types, allows calling a function.
+---| 'session' # Allows a user to connect to an instance over IPROTO.
+---| 'usage' # Allows a user to use their privileges on database objects (for example, read, write, and alter spaces).
+---| string # Multiple permissions split by ','. For example, `read,write` means that the user can read and write data from the specified object.
+
+---@alias box.schema.privileges.object_type
+---| 'universe' # A database (box.schema) that contains database objects, including spaces, indexes, users, roles, sequences, and functions. Granting privileges to universe gives a user access to any object in the database.
+---| 'user' # A user.
+---| 'role' # A role.
+---| 'space' # A space.
+---| 'function' # A function.
+---| 'sequence' # A sequence.
+---| 'lua_eval' # Executing arbitrary Lua code.
+---| 'lua_call' # Calling any global user-defined Lua function.
+---| 'sql' # Executing an arbitrary SQL statement.
+
+---Grant privileges a user or to another role.
+---
+---If `'function','{object-name}'` is specified, then a _func tuple with that object-name must exist.
+---
+---**Variation:** instead of `object-type, object-name` say `universe` which means 'all object-types and all objects'. In this case, object name is omitted.
+---
+---**Variation:** instead of `permissions, object-type, object-name` say `role-name`.
+---
+---**Variation:** instead of `box.schema.user.grant('{username}','usage,session','universe',nil, {if_not_exists=true})` say `box.schema.user.enable('{username}')`.
+---
+---**Examples:**
+---
+--- ```lua
+--- box.schema.user.grant('testuser', 'read', 'space', 'writers')
+--- box.schema.user.grant('testuser', 'read,write', 'space', 'books')
+--- ```
+---
+---@param username string The name of a user to grant privileges to
+---@param permissions box.schema.privileges.permissions One or more permissions to grant to the user (for example, `read` or `read,write`)
+---@param object_type box.schema.privileges.object_type A database object type to grant privileges to (for example, `space`, `role`, or `function`)
+---@param object_name string The name of a database object to grant privileges to
+---@param options? { grantor?: string | number, if_not_exists?: boolean }
+---@overload fun(username: string, permissions: box.schema.privileges.permissions, universe: 'universe', _: nil, options?: { grantor?: string | number, if_not_exists?: boolean }})
+---@overload fun(username: string, role_name: string, _1: nil, _2: nil, options?: { grantor?: string | number, if_not_exists?: boolean }})
+function box.schema.user.grant(username, permissions, object_type, object_name, options) end
+
+---Revoke privileges from a user or from another role.
+---
+---If `'function','{object-name}'` is specified, then a _func tuple with that object-name must exist.
+---
+---**Variation:** instead of `object-type, object-name` say 'universe' which means 'all object-types and all objects'.
+---
+---**Variation:** instead of `permissions, object-type, object-name` say `role-name`.
+---
+---**Variation:** instead of `box.schema.user.revoke('{username}','usage,session','universe',nil,` :code:`{if_exists=true})` say `box.schema.user.disable('{username}')`.
+---
+---**Examples:**
+---
+--- ```lua
+--- box.schema.user.revoke('testuser', 'write', 'space', 'books')
+--- ```
+---
+---@param username string The name of a user to grant privileges to
+---@param permissions box.schema.privileges.permissions One or more permissions to grant to the user (for example, `read` or `read,write`)
+---@param object_type box.schema.privileges.object_type A database object type to grant privileges to (for example, `space`, `role`, or `function`)
+---@param object_name string The name of a database object to grant privileges to
+---@param options? { grantor?: string | number, if_not_exists?: boolean }
+---@overload fun(username: string, permissions: box.schema.privileges.permissions, universe: 'universe', _: nil, options?: { grantor?: string | number, if_not_exists?: boolean }})
+---@overload fun(username: string, role_name: string, _1: nil, _2: nil, options?: { grantor?: string | number, if_not_exists?: boolean }})
+function box.schema.user.revoke(username, object_type, object_name, options) end
+
+---Sets a password for a currently logged in or a specified user.
+---
+---* A currently logged-in user can change their password using `box.schema.user.passwd(password)`.
+---* An administrator can change the password of another user with `box.schema.user.passwd(username, password)`.
+---
+---**Examples:**
+---
+--- Set a password for the current user:
+--- ```lua
+--- box.schema.user.passwd('foobar')
+--- ```
+---
+--- Set a password for the specified user:
+--- ```lua
+--- box.schema.user.passwd('testuser', 'foobar')
+--- ```
+---
+---@param username string A username
+---@param password string A new password
+---@overload fun(password: string)
+function box.schema.user.passwd(username, password) end
+
+---Return a hash of a user's password.
+---
+---For explanation of how Tarantool maintains passwords, see section [Passwords](doc://authentication-passwords) and reference on [box.space._user](lua://box.space.user) space.
+---
+---**Note:**
+---
+---* If a non-'guest' user has no password, it’s **impossible** to connect to Tarantool using this user. The user is regarded as "internal" only, not usable from a remote connection.
+---
+---Such users can be useful if they have defined some procedures with the [`SETUID`](lua://box.schema.func.create) option, on which privileges are granted to externally-connectable users.
+---
+---This way, external users cannot create/drop objects, they can only invoke procedures.
+---
+---* For the 'guest' user, it’s impossible to set a password: that would be misleading, since 'guest' is the default user on a newly-established connection over a [binary port](doc://admin-security), and Tarantool does not require a password to establish a [binary connection](doc://box_protocol-iproto_protocol).
+---
+---It is, however, possible to change the current user to ‘guest’ by providing the [AUTH packet](doc://box_protocol-authentication) with no password at all or an empty password. This feature is useful for connection pools, which want to reuse a connection for a different user without re-establishing it.
+---
+---**Example:**
+---
+--- ```lua
+--- box.schema.user.password('foobar')
+--- ```
+---
+---@param password string Password to be hashed
+---@return string
+function box.schema.user.password(password) end
+
+---@alias box.schema.privileges [box.schema.privileges.permissions, box.schema.privileges.object_type, string | nil][]
+
+---Return a description of a user's privileges.
+---
+---See [privileges](doc://authentication-owners_privileges) for more information on user's privileges.
+---
+---@param username? string Username. If not supplied, the current user who is logged in is used.
+---@return box.schema.privileges
+function box.schema.user.info(username) end
+
+---Check if user exists.
+---
+---For explanation of how Tarantool maintains user data, see section [Users](doc://authentication-users) and reference on [box.space._user](lua://box.space.user) space.
+---
+---@param username? string The name of the user
+---@return bool exists `true` if a user exists; `false` if a user does not
+function box.schema.user.exists(username) end
+
 ---Role privileges management.
----
----This module hasn't been documented yet.
----
----@type any
 box.schema.role = {}
+
+function box.schema.role.create(role_name, options) end
+
+function box.schema.role.drop(role_name, options) end
+
+---Grant privileges a role.
+---
+---If `'function','{object-name}'` is specified, then a _func tuple with that object-name must exist.
+---
+---**Variation:** instead of `object-type, object-name` say `universe` which means 'all object-types and all objects'. In this case, object name is omitted.
+---
+---**Variation:** instead of `permissions, object-type, object-name` say `role-name`.
+---
+---**Examples:**
+---
+--- ```lua
+--- box.schema.role.grant('writers_space_reader', 'read', 'space', 'writers')
+--- box.schema.role.grant('books_space_manager', 'read,write', 'space', 'books')
+--- ```
+---
+---@param role_name string The name of a role to grant privileges to
+---@param permissions box.schema.privileges.permissions One or more permissions to grant to the role (for example, `read` or `read,write`)
+---@param object_type box.schema.privileges.object_type A database object type to grant privileges to (for example, `space`, `role`, or `function`)
+---@param object_name string The name of a database object to grant privileges to
+---@param options? { grantor?: string | number, if_not_exists?: boolean }
+---@overload fun(role_name: string, permissions: box.schema.privileges.permissions, universe: 'universe', _: nil, options?: { grantor?: string | number, if_not_exists?: boolean }})
+---@overload fun(role_name: string, role_name: string, _1: nil, _2: nil, options?: { grantor?: string | number, if_not_exists?: boolean }})
+function box.schema.role.grant(role_name, object_type, object_name, options) end
+
+---Revoke privileges from a role.
+---
+---If `'function','{object-name}'` is specified, then a _func tuple with that object-name must exist.
+---
+---**Variation:** instead of `object-type, object-name` say 'universe' which means 'all object-types and all objects'.
+---
+---**Variation:** instead of `permissions, object-type, object-name` say `role-name`.
+---
+---@param role_name string The name of a role to grant privileges to
+---@param permissions box.schema.privileges.permissions One or more permissions to grant to the role (for example, `read` or `read,write`)
+---@param object_type box.schema.privileges.object_type A database object type to grant privileges to (for example, `space`, `role`, or `function`)
+---@param object_name string The name of a database object to grant privileges to
+---@param options? { grantor?: string | number, if_not_exists?: boolean }
+---@overload fun(role_name: string, permissions: box.schema.privileges.permissions, universe: 'universe', _: nil, options?: { grantor?: string | number, if_not_exists?: boolean }})
+---@overload fun(role_name: string, role_name: string, _1: nil, _2: nil, options?: { grantor?: string | number, if_not_exists?: boolean }})
+function box.schema.role.revoke(role_name, object_type, object_name, options) end
+
+---Return a description of a role's privileges.
+---
+---See [privileges](doc://authentication-owners_privileges) for more information on role's privileges.
+---
+---@param role_name string
+---@return box.schema.privileges
+function box.schema.role.info(role_name) end
+
+---Check if role exists.
+---
+---@param role_name string
+---@return bool exists `true` if a role exists; `false` if a role does not
+function box.schema.role.exists(role_name) end
 
 ---Stored function management.
 ---
@@ -155,9 +371,3 @@ box.schema.role = {}
 ---
 ---@type any
 box.schema.func = {}
-
----@alias box.schema.user.grant_object_type
----| "space"
----| "function"
----| "sequence"
----| "role"

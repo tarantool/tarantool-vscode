@@ -394,10 +394,11 @@ function file_handle:pwrite(new_string, offset) end
 
 ---Perform non-random-access read on a file.
 ---
----@overload fun(buffer: ffi.cdata*, count: number): number
----@param count? number number of bytes to read
----@return string buffer
-function file_handle:read(count) end
+---@param buffer ffi.cdata*
+---@param count number
+---@return number
+---@overload fun(count?: number): string
+function file_handle:read(buffer, count) end
 
 ---Perform non-random-access write on a file.
 ---

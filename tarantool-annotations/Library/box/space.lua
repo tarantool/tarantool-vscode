@@ -18,8 +18,231 @@ local space_methods = {}
 ---
 ---It has the data-manipulation functions `select`, `insert`, `replace`, `update`, `upsert`, `delete`, ``get``, `put`. It also has members, such as id, and whether or not a space is enabled.
 ---
----@type { [string]: box.space<any, any> }
+---@class box.spaces
+---@field [string] box.space<any, any>
 box.space = {}
+
+---@alias box.space._user_tuple [integer, integer, string, 'user' | 'role', ffi.cdata* | nil, ffi.cdata* | nil, integer | nil]
+---@alias box.space._user_info {
+---    id: integer,
+---    creator: integer,
+---    name: string,
+---    type: 'user' | 'role',
+---    auth?: ffi.cdata*,
+---    auth_history?: ffi.cdata*,
+---    owner?: integer,
+---}
+
+---System `_user` space.
+---
+---`_user` is a system space where user names and password hashes are stored.
+---
+---Learn more about Tarantool's access control system from the [access control](doc://access_control) topic.
+---
+---There are five special tuples in the `_user` space: 'guest', 'admin', 'public', 'replication', and 'super'.
+---
+--- +-------------+----+------+----------------------------------------------------------------+
+--- | Name        | ID | Type | Description                                                    |
+--- +=============+====+======+================================================================+
+--- | guest       | 0  | user | Default user when connecting remotely.                         |
+--- |             |    |      | Usually, an untrusted user with few privileges.                |
+--- +-------------+----+------+----------------------------------------------------------------+
+--- | admin       | 1  | user | Default user when using Tarantool as a console.                |
+--- |             |    |      | Usually, an                                                    |
+--- |             |    |      | [administrative user](doc://authentication-owners_privileges)                                            |
+--- |             |    |      | with all privileges.                                           |
+--- +-------------+----+------+----------------------------------------------------------------+
+--- | public      | 2  | role | Pre-defined [role](doc://authentication-roles),                                              |
+--- |             |    |      | automatically granted to new users when they are               |
+--- |             |    |      | created with                                                   |
+--- |             |    |      | `box.schema.user.create(user-name)`.                             |
+--- |             |    |      | Therefore a convenient way to grant 'read' on space            |
+--- |             |    |      | 't' to every user that will ever exist is with                 |
+--- |             |    |      | `box.schema.role.grant('public','read','space','t')`.            |
+--- +-------------+----+------+----------------------------------------------------------------+
+--- | replication | 3  | role | Pre-defined [role](doc://authentication-roles),                                              |
+--- |             |    |      | which the 'admin' user can grant to users who need to use      |
+--- |             |    |      | [replication](doc://replication) features.                                          |
+--- +-------------+----+------+----------------------------------------------------------------+
+--- | super       | 31 | role | Pre-defined [role](doc://authentication-roles),                                              |
+--- |             |    |      | which the 'admin' user can grant to users who need all         |
+--- |             |    |      | privileges on all objects.                                     |
+--- |             |    |      | The 'super' role has these privileges on                       |
+--- |             |    |      | 'universe':                                                    |
+--- |             |    |      | read, write, execute, create, drop, alter.                     |
+--- +-------------+----+------+----------------------------------------------------------------+
+---
+---To select a tuple from the `_user` space, use `box.space._user:select()`.
+---In the example below, `select` is executed for a user with id = 0.
+---This is the 'guest' user that has no password.
+---
+--- ```tarantoolsession
+--- tarantool> box.space._user:select{0}
+--- ---
+--- - - [0, 1, 'guest', 'user']
+--- ...
+--- ```
+---
+---**Warning:**
+---
+---To change tuples in the `_user` space, do not use ordinary `box.space` functions for insert, update, or delete.
+---
+---Learn more from [access control users](doc://access_control_users).
+---
+---@type box.space<box.space._user_tuple, box.space._user_info>
+box.space._user = {}
+
+---System `_cluster` space
+---
+---`_cluster` is a system space for support of the [replication feature](doc://replication).
+---
+---@type box.space<unknown, unknown>
+box.space._cluster = {}
+
+---System `_func` space
+---
+---A system space containing functions created using [`box.schema.func.create()`](lua://<box.schema.func.create).
+---
+---If a function's definition is specified in the body option, this function is *persistent*.
+---In this case, its definition is stored in a snapshot and can be recovered if the server restarts.
+---
+---@type box.space<unknown, unknown>
+box.space._func = {}
+
+---@alias box.space._space_tuple [integer, integer, string, string, { unique: boolean }]
+---@alias box.space._space_info {
+---    id: integer,
+---    owner: integer,
+---    name: string,
+---    engine: string,
+---    field_count: integer,
+---    flags: { temporary: boolean },
+---    format: { [integer]: { [string]: string } },
+---}
+
+---System `_space` space.
+---
+---`_space` is a system space. It contains all spaces hosted on the current Tarantool instance, both system ones and created by users.
+---
+---The [system space view](lua://box.space.sysviews) for `_space` is `_vspace`.
+---
+---**Example #1:**
+---
+---The following function will display every simple field in all tuples of `_space`.
+---
+--- ```lua
+--- function example()
+---     local ta = {}
+---     local i, line
+---     for k, v in box.space._space:pairs() do
+---         i = 1
+---         line = ''
+---         while i <= #v do
+---             if type(v[i]) ~= 'table' then
+---                 line = line .. v[i] .. ' '
+---             end
+---         i = i + 1
+---         end
+---         table.insert(ta, line)
+---     end
+---     return ta
+--- end
+--- ```
+---
+---Here is what `example()` returns in a typical installation:
+---
+--- ```tarantoolsession
+--- tarantool> example()
+--- ---
+--- - - '272 1 _schema memtx 0  '
+---   - '280 1 _space memtx 0  '
+---   - '281 1 _vspace sysview 0  '
+---   - '288 1 _index memtx 0  '
+---   - '296 1 _func memtx 0  '
+---   - '304 1 _user memtx 0  '
+---   - '305 1 _vuser sysview 0  '
+---   - '312 1 _priv memtx 0  '
+---   - '313 1 _vpriv sysview 0  '
+---   - '320 1 _cluster memtx 0  '
+---   - '512 1 tester memtx 0  '
+---   - '513 1 origin vinyl 0  '
+---   - '514 1 archive memtx 0  '
+--- ...
+--- ```
+---
+---**Example #2:**
+---
+---The following requests will create a space using [`box.schema.space.create()`](lua://box.schema.space.create) with a [format clause](lua://box.space.format), then retrieve the `_space` tuple for the new space.
+---
+---This illustrates the typical use of the `format` clause, it shows the recommended names and data types for the fields.
+---
+--- ```tarantoolsession
+--- tarantool> box.schema.space.create('TM', {
+--- >   id = 12345,
+--- >   format = {
+--- >     [1] = {["name"] = "field_1"},
+--- >     [2] = {["type"] = "unsigned"}
+--- >   }
+--- > })
+--- ---
+--- - index: []
+---   on_replace: 'function: 0x41c67338'
+---   temporary: false
+---   id: 12345
+---   engine: memtx
+---   enabled: false
+---   name: TM
+---   field_count: 0
+--- - created
+--- ...
+--- tarantool> box.space._space:select(12345)
+--- ---
+--- - - [12345, 1, 'TM', 'memtx', 0, {}, [{'name': 'field_1'}, {'type': 'unsigned'}]]
+--- ...
+--- ```
+---@type box.space<box.space._space_tuple, box.space._space_info>
+box.space._space = {}
+
+---@alias box.space._index_tuple [integer, integer, string, string, { unique: boolean }]
+---@alias box.space._index_info {
+---    id: integer,
+---    iid: integer,
+---    name: string,
+---    type: string,
+---    opts: { unique: boolean },
+---}
+
+---System `_index` space.
+---
+---Tuples in this space contain the following fields:
+---
+---Here is what `_index` contains in a typical installation:
+---
+--- ```tarantoolsession
+--- tarantool> box.space._index:select{}
+--- ---
+--- - - [272, 0, 'primary', 'tree', {'unique': true}, [[0, 'string']]]
+---   - [280, 0, 'primary', 'tree', {'unique': true}, [[0, 'unsigned']]]
+---   - [280, 1, 'owner', 'tree', {'unique': false}, [[1, 'unsigned']]]
+---   - [280, 2, 'name', 'tree', {'unique': true}, [[2, 'string']]]
+---   - [281, 0, 'primary', 'tree', {'unique': true}, [[0, 'unsigned']]]
+---   - [281, 1, 'owner', 'tree', {'unique': false}, [[1, 'unsigned']]]
+---   - [281, 2, 'name', 'tree', {'unique': true}, [[2, 'string']]]
+---   - [288, 0, 'primary', 'tree', {'unique': true}, [[0, 'unsigned'], [1, 'unsigned']]]
+---   - [288, 2, 'name', 'tree', {'unique': true}, [[0, 'unsigned'], [2, 'string']]]
+---   - [289, 0, 'primary', 'tree', {'unique': true}, [[0, 'unsigned'], [1, 'unsigned']]]
+---   - [289, 2, 'name', 'tree', {'unique': true}, [[0, 'unsigned'], [2, 'string']]]
+---   - [296, 0, 'primary', 'tree', {'unique': true}, [[0, 'unsigned']]]
+---   - [296, 1, 'owner', 'tree', {'unique': false}, [[1, 'unsigned']]]
+---   - [296, 2, 'name', 'tree', {'unique': true}, [[2, 'string']]]
+--- ---
+--- ...
+--- ```
+---
+---The [system space view](box_space-sysviews) for `_index` is `_vindex`.
+---
+---@type box.space<box.space._index_tuple, box.space._index_info>
+box.space._index = {}
 
 ---Create an index.
 ---
@@ -154,7 +377,7 @@ function space_methods:count(key, iterator) end
 --- tarantool> box.space.tester:delete('a')
 --- ---
 --- - error: 'Supplied key type of part 0 does not match index part type:
---- expected unsigned'
+---   expected unsigned'
 --- ...
 --- ```
 ---
@@ -288,16 +511,12 @@ function space_methods:on_replace(trigger_func, old_trigger_func) end
 ---@return box.space.replace_trigger<T, U> | nil func the old trigger if it was replaced or deleted
 function space_methods:before_replace(trigger_func, old_trigger_func) end
 
----@alias box.space.iterator<T> fun.array_iterator<T>
----@alias box.space.iterator.param string
----@alias box.space.iterator.state ffi.cdata*
+---@alias box.space.iterator<T, U> fun.iterator<box.tuple<T, U>, nil>
 
 ---Search for a tuple or a set of tuples in the given space, and allow iterating over one tuple at a time.
 ---@param key? box.tuple<T, U>|tuple_type[]|scalar value to be matched against the index key, which may be multi-part
 ---@param iterator? box.iterator (Default: 'EQ') defines iterator order
----@return box.space.iterator<T>,
----@return box.space.iterator.param
----@return box.space.iterator.state
+---@return box.space.iterator<T, U>
 function space_methods:pairs(key, iterator) end
 
 ---Rename a space.
@@ -380,7 +599,7 @@ function space_methods:run_triggers(flag) end
 ---
 ---**Note:** this method doesn't yield. For details, [Cooperative multitasking](doc://app-cooperative_multitasking).
 ---
----**Note:** the `after` and `fetch_pos` options are supported for the `TREE` :ref:`index <index-types>` only.
+---**Note:** the `after` and `fetch_pos` options are supported for the `TREE` [index](doc://index-types) only.
 ---
 ---**Possible errors:**
 ---
@@ -423,16 +642,16 @@ function space_methods:run_triggers(flag) end
 --- tarantool> bands:select({3}, {iterator='GT', limit = 3})
 --- ---
 --- - - [4, 'The Beatles', 1960]
---- - [5, 'Pink Floyd', 1965]
---- - [6, 'The Rolling Stones', 1962]
+---   - [5, 'Pink Floyd', 1965]
+---   - [6, 'The Rolling Stones', 1962]
 --- ...
 ---
 --- -- Select maximum 3 tuples after the specified tuple --
 --- tarantool> bands:select({}, {after = {4, 'The Beatles', 1960}, limit = 3})
 --- ---
 --- - - [5, 'Pink Floyd', 1965]
---- - [6, 'The Rolling Stones', 1962]
---- - [7, 'The Doors', 1965]
+---   - [6, 'The Rolling Stones', 1962]
+---   - [7, 'The Doors', 1965]
 --- ...
 ---
 --- -- Select first 3 tuples and fetch a last tuple's position --
@@ -443,8 +662,8 @@ function space_methods:run_triggers(flag) end
 --- tarantool> bands:select({}, {limit = 3, after = position})
 --- ---
 --- - - [4, 'The Beatles', 1960]
---- - [5, 'Pink Floyd', 1965]
---- - [6, 'The Rolling Stones', 1962]
+---   - [5, 'Pink Floyd', 1965]
+---   - [6, 'The Rolling Stones', 1962]
 --- ...
 --- ```
 ---
@@ -653,10 +872,172 @@ function space_methods:upsert(tuple, update_operations) end
 --- tarantool> s:frommap({b = 'x', a = 123456}, {table = true})
 --- ---
 --- - - 123456
---- - x
+---   - x
 --- ...
 --- ```
 ---
 ---@param tbl U
 ---@return box.tuple<T, U>
 function space_methods:frommap(tbl) end
+
+---Declare field names and types.
+---
+---**Possible errors:**
+---* `space_object` does not exist.
+---* Field names are duplicated.
+---* Type is not legal.
+---
+---If you need to make a schema migration, see section [Migrations](doc://migrations).
+---
+---Ordinarily Tarantool allows unnamed untyped fields. But with `format` users can, for example, document that the Nth field is the surname field and must contain strings. It is also possible to specify a format clause in [`box.schema.space.create()`](lua://box.schema.space.create)`.
+---
+---It is not legal for tuples to contain values that have the wrong type. The example below will cause an error:
+---
+--- ```lua
+---
+--- --This example will cause an error.
+--- box.space.tester:format({{' ',type='number'}})
+--- box.space.tester:insert{'string-which-is-not-a-number'}
+---
+--- ```
+---
+---It is not legal for tuples to contain null values if `is_nullable=false`, which is the default. The example below will cause an error:
+---
+--- ```lua
+--- --This example will cause an error.
+--- box.space.tester:format({{' ',type='number',is_nullable=false}})
+--- box.space.tester:insert{nil,2}
+--- ```
+---
+---It is legal for tuples to have more fields than are described by a format clause. The way to constrain the number of fields is to specify a space's [field_count](lua://box.space.field_count) member.
+---
+---It is legal for tuples to have fewer fields than are described by a format clause, if the omitted trailing fields are described with `is_nullable=true`. For example, the request below will not cause a format-related error:
+---
+---
+--- ```lua
+--- box.space.tester:format({{'a',type='number'},{'b',type='number',is_nullable=true}})
+--- box.space.tester:insert{2}
+--- ```
+---
+---It is legal to use `format` on a space that already has a format, thus replacing any previous definitions, provided that there is no conflict with existing data or index definitions.
+---
+---It is legal to use `format` to change the `is_nullable` flag. The example below will not cause an error - and will not cause rebuilding of the space.
+---
+--- ```lua
+--- box.space.tester:format({{' ',type='scalar',is_nullable=false}})
+--- box.space.tester:format({{' ',type='scalar',is_nullable=true}})
+--- ```
+---
+---But going the other way and changing `is_nullable` from `true` to `false` might cause rebuilding and might cause an error if there are existing tuples with nulls.
+---
+---**Example:**
+---
+--- ```lua
+--- box.space.tester:format({{name='surname',type='string'},{name='IDX',type='array'}})
+--- box.space.tester:format({{name='surname',type='string',is_nullable=true}})
+--- ```
+---
+---There are legal variations of the format clause:
+---* omitting both 'name=' and 'type=',
+---* omitting 'type=' alone,
+---* adding extra braces.
+---
+---The following examples show all the variations, first for one field named 'x', second for two fields named 'x' and 'y'.
+---
+--- ```lua
+--- box.space.tester:format({{name='x',type='scalar'}})
+--- box.space.tester:format({{name='x',type='scalar'},{name='y',type='unsigned'}})
+---
+--- box.space.tester:format({{'x'}})
+--- box.space.tester:format({{'x'},{'y'}})
+---
+--- -- types
+--- box.space.tester:format({{name='x'}})
+--- box.space.tester:format({{name='x'},{name='y'}})
+---
+--- box.space.tester:format({{'x',type='scalar'}})
+--- box.space.tester:format({{'x',type='scalar'},{'y',type='unsigned'}})
+---
+--- box.space.tester:format({{'x','scalar'}})
+--- box.space.tester:format({{'x','scalar'},{'y','unsigned'}})
+--- ```
+---
+---The following example shows how to create a space, format it with all possible types, and insert into it.
+---
+--- ```tarantoolsession
+--- tarantool> box.schema.space.create('t')
+--- ---
+--- - engine: memtx
+---   before_replace: 'function: 0x4019c488'
+---   on_replace: 'function: 0x4019c460'
+---   ck_constraint: []
+---   field_count: 0
+---   temporary: false
+---   index: []
+---   is_local: false
+---   enabled: false
+---   name: t
+---   id: 534
+--- - created
+--- ...
+--- tarantool> ffi = require('ffi')
+--- ---
+--- ...
+--- tarantool> decimal = require('decimal')
+--- ---
+--- ...
+--- tarantool> uuid = require('uuid')
+--- ---
+--- ...
+--- tarantool> box.space.t:format({{name = '1', type = 'any'},
+---          >                     {name = '2', type = 'unsigned'},
+---          >                     {name = '3', type = 'string'},
+---          >                     {name = '4', type = 'number'},
+---          >                     {name = '5', type = 'double'},
+---          >                     {name = '6', type = 'integer'},
+---          >                     {name = '7', type = 'boolean'},
+---          >                     {name = '8', type = 'decimal'},
+---          >                     {name = '9', type = 'uuid'},
+---          >                     {name = 'a', type = 'scalar'},
+---          >                     {name = 'b', type = 'array'},
+---          >                     {name = 'c', type = 'map'}})
+--- ---
+--- ...
+--- tarantool> box.space.t:create_index('i',{parts={2, type = 'unsigned'}})
+--- ---
+--- - unique: true
+---   parts:
+---   - type: unsigned
+---     is_nullable: false
+---     fieldno: 2
+---   id: 0
+---   space_id: 534
+---   type: TREE
+---   name: i
+--- ...
+--- tarantool> box.space.t:insert{{'a'}, -- any
+---          >                    1, -- unsigned
+---          >                    'W?', -- string
+---          >                    5.5, -- number
+---          >                    ffi.cast('double', 1), -- double
+---          >                    -0, -- integer
+---          >                    true, -- boolean
+---          >                    decimal.new(1.2), -- decimal
+---          >                    uuid.new(), -- uuid
+---          >                    true, -- scalar
+---          >                    {{'a'}}, -- array
+---          >                    {val=1}} -- map
+--- ---
+--- - [['a'], 1, 'W?', 5.5, 1, 0, true, 1.2, 1f41e7b8-3191-483d-b46e-1aa6a4b14557, true, [['a']], {'val': 1}]
+--- ...
+--- ```
+---
+---Names specified with the format clause can be used in [`box.space.get()`](lua://box.space.get) and in [`box.space.create_index()`](lua://box.space.create_index) and in :doc:`/reference/reference_lua/box_tuple/field_name` and in :doc:`/reference/reference_lua/box_tuple/field_path`.
+---
+---If the format clause is omitted, then the returned value is the table that was used in a previous `{space_object}:format({format-clause})` invocation. For example, after `box.space.tester:format({{'x','scalar'}})`, `box.space.tester:format()` will return `[{'name': 'x', 'type': 'scalar'}]`.
+---
+---Formatting or reformatting a large space will cause occasional [yields](doc://app-yields) so that other requests will not be blocked. If the other requests cause an illegal situation such as a field value of the wrong type, the formatting or reformatting will fail.
+---
+---@param format? box.space.format
+---@return box.space.format
+function space_methods:format(format) end

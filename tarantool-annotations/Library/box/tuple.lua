@@ -1,6 +1,8 @@
 ---@meta
 
----@class box.tuple<T, U>: (T | U)
+-- TODO: need generic inheritance to inherit from `T & U`.
+
+---@class box.tuple<T, U>: table
 local tuple_object = {}
 
 ---Number of bytes in the tuple.
@@ -224,7 +226,7 @@ function tuple_object:totable(start_field_number, end_field_number) end
 ---This only works if the tuple comes from a space that has been formatted with a format clause.
 ---
 ---@param options? { names_only: boolean }
----@return T | U
+---@return T & U
 function tuple_object:tomap(options) end
 
 ---Update a tuple.
