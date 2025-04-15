@@ -1,3 +1,7 @@
+[![Visual Studio Marketplace](https://img.shields.io/visual-studio-marketplace/v/tarantool.tarantool?style=flat-square&logo=visual-studio-code&label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=tarantool.tarantool)
+[![Downloads](https://img.shields.io/visual-studio-marketplace/i/tarantool.tarantool?style=flat-square&logo=microsoft&label=Downloads)](https://marketplace.visualstudio.com/items?itemName=tarantool.tarantool)
+[![Build status](https://img.shields.io/github/actions/workflow/status/tarantool/tarantool-vscode/build.yml?branch=main&style=flat-square&logo=github&label=Build)](https://github.com/tarantool/tarantool-vscode/actions/workflows/build.yml)
+
 # 🕷 Tarantool VS Code Extension
 
 <a href="http://tarantool.io">
