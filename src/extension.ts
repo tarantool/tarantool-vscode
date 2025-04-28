@@ -32,7 +32,6 @@ async function initGlobalEmmyrc() {
 	const existingEmmyrc = JSON.parse(f);
 	const upToDate = _.isMatch(existingEmmyrc, emmyrc);
 	if (upToDate) {
-		vscode.window.showInformationMessage(`${globalEmmyrcPath} is up to date`);
 		return;
 	}
 
