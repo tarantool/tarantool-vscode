@@ -75,7 +75,17 @@
         ],
         "url": "https://download.tarantool.org/tarantool/schema/config.schema.json"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Tarantool",
+      "properties": {
+        "tarantool.ttPath": {
+           "type": "string",
+           "default": "tt",
+           "markdownDescription": "Specifies a path to the TT executable, defaults to the one available in the `$PATH`."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

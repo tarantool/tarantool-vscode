@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import commandExists = require('command-exists');
 import { Octokit } from '@octokit/core';
+import * as utils from './utils';
 
 const octokit = new Octokit();
 
@@ -15,12 +16,15 @@ function getTerminal(): vscode.Terminal {
 
 function cmd(body: string) {
 	return async () => {
-		const tt = 'tt';
+		const wsFolder = utils.fetchWsFolder();
+		const config = vscode.workspace.getConfiguration(undefined, wsFolder);
+		const tt = config.get<string>('tarantool.ttPath') || 'tt';
+
 		commandExists(`${tt}`).then(() => {
 			const t = getTerminal();
 			t.sendText(`${tt} ${body}`);
 		}).catch(function () {
-			vscode.window.showErrorMessage('TT is not installed');
+			vscode.window.showErrorMessage('TT is not available. Install it or provide a path to it explicitly in the Tarantool plugin configuration.');
 		});
 	};
 }

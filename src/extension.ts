@@ -3,6 +3,7 @@ import * as tt from './tt';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as _ from 'lodash';
+import * as utils from './utils';
 
 const annotationsPaths = [
 	__dirname + "/Library",
@@ -43,21 +44,12 @@ async function initGlobalEmmyrc() {
 }
 
 async function initVs() {
-	const file = vscode.window.activeTextEditor?.document.uri.fsPath;
+	const wsPath = utils.fetchWsFolder({ showWarning: true })?.uri.fsPath;
+	if (!wsPath) {
+		return;
+	}
 
 	const wsedit = new vscode.WorkspaceEdit();
-	const wsFolders = vscode.workspace.workspaceFolders?.map((folder) => folder.uri.fsPath);
-	if (!wsFolders) {
-		vscode.window.showWarningMessage('Please, open a project before running this command');
-		return;
-	}
-	
-	const wsPath = file ? wsFolders.find((folder) => file.startsWith(folder)) : wsFolders.at(0);
-	if (!wsPath) {
-		vscode.window.showWarningMessage('Please, open at least one folder within the workspace');
-		return;
-	}
-
 	const filePath = vscode.Uri.file(`${wsPath}/${emmyrcFile}`);
 	if (fs.existsSync(filePath.fsPath)) {
 		const yes = "Yes";
