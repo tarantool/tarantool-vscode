@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A `tarantool.ttPath` configuration option can now be used to specify a path to
+  TT utility if it's not available in the `$PATH`.
+
 ### Changed
 
 - Now the extension automatically setups Tarantool annotations without need to
