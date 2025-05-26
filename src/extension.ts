@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as tt from './tt';
 import * as fs from 'fs';
-import * as os from 'os';
 import * as _ from 'lodash';
 import * as utils from './utils';
 
@@ -18,28 +17,41 @@ const emmyrc = {
 	}
 };
 const emmyrcFile = '.emmyrc.json';
+const globalEmmyrcKey = 'emmylua.misc.globalConfigPath';
+const globalEmmyrcPath = __dirname + `/${emmyrcFile}`;
 
 async function initGlobalEmmyrc() {
-	const globalEmmyrcPath = `${os.homedir()}/${emmyrcFile}`;
+	const config = vscode.workspace.getConfiguration(undefined, null);
+	const configuredGlobalEmmyrcPath = config.get(globalEmmyrcKey);
 
-	if (!fs.existsSync(globalEmmyrcPath)) {
-		fs.writeFileSync(globalEmmyrcPath, JSON.stringify(emmyrc, undefined, 2));
-		vscode.window.showInformationMessage(`Initialized ${globalEmmyrcPath} with Tarantool-specific settings`);
-		return;
+	let existingEmmyrc = {};
+	try {
+		const f = fs.readFileSync(globalEmmyrcPath, 'utf8');
+		existingEmmyrc = JSON.parse(f);
+	} catch {
+		existingEmmyrc = {};
 	}
-
-	const f = fs.readFileSync(globalEmmyrcPath, 'utf8');
-	const existingEmmyrc = JSON.parse(f);
 	const upToDate = _.isMatch(existingEmmyrc, emmyrc);
-	if (upToDate) {
-		return;
+	if (!upToDate) {
+		fs.writeFileSync(globalEmmyrcPath, JSON.stringify(emmyrc, undefined, 2));
 	}
 
-	// TODO: Don't miss user-defined libraries.
-	const mergedEmmyrc = _.merge(existingEmmyrc, emmyrc);
-
-	fs.writeFileSync(globalEmmyrcPath, JSON.stringify(mergedEmmyrc, undefined, 2));
-	vscode.window.showInformationMessage(`Updated existing ${globalEmmyrcPath} with actual Tarantool-specific configuration`);
+	const desiredGlobalEmmyrcPath = globalEmmyrcPath;
+	if (configuredGlobalEmmyrcPath !== desiredGlobalEmmyrcPath) {
+		try {
+			await config.update(globalEmmyrcKey, desiredGlobalEmmyrcPath, vscode.ConfigurationTarget.Global);
+		} catch {
+			vscode.window.showWarningMessage(`Tarantool extension has been unable to update the global configuration of the EmmyLua extension with its specific annotations. Run 'Tarantool: Initialize VS Code extension...' to initialize the annotations per-project`);
+			return;
+		}
+		try {
+			await vscode.commands.executeCommand('emmy.restartServer');
+		} catch {
+			vscode.window.showWarningMessage(`Tarantool extension has updated the configuration but wasn't able to restart the EmmyLua extension. Please, restart it manually`);
+			return;
+		}
+		vscode.window.showInformationMessage(`The EmmyLua extension has been updated with Tarantool-specific settings`);
+	}
 }
 
 async function initVs() {
