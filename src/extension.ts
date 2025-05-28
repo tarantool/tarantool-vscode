@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as tt from './tt';
 import * as fs from 'fs';
 import * as _ from 'lodash';
+import * as semver from 'semver';
 import * as utils from './utils';
 
 const annotationsPaths = [
@@ -19,8 +20,16 @@ const emmyrc = {
 const emmyrcFile = '.emmyrc.json';
 const globalEmmyrcKey = 'emmylua.misc.globalConfigPath';
 const globalEmmyrcPath = __dirname + `/${emmyrcFile}`;
+const globalConfigEmmyluaVersion = '0.9.19';
 
 async function initGlobalEmmyrc() {
+	const emmyLua = vscode.extensions.getExtension('tangzx.emmylua');
+	const emmyLuaVersion = emmyLua?.packageJSON.version;
+	if (!semver.gte(emmyLuaVersion, globalConfigEmmyluaVersion)) {
+		vscode.window.showWarningMessage(`Unable to set up Tarantool extension globally due to the old version of the EmmyLua extension: current version is ${emmyLuaVersion}, required version is ${globalConfigEmmyluaVersion}. Consider updating EmmyLua using marketplace or run a 'Tarantool: Initialize VS Code extension...' command having your Tarantool project opened`);
+		return;
+	}
+
 	const config = vscode.workspace.getConfiguration(undefined, null);
 	const configuredGlobalEmmyrcPath = config.get(globalEmmyrcKey);
 
