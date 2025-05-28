@@ -342,10 +342,20 @@ function space_methods:bsize() end
 function space_methods:count(key, iterator) end
 
 
+---@alias box.space.foreign_key { space: string, field: string | { [string]: string } }
+---@alias box.space.collation "unicode" | "unicode_ci"
+---@alias box.space.nullable_action 'none'|'rollback'|'abort'|'fail'|'ignore'|'replace'|'default'
+
 ---@alias box.space.field_format {
 ---     name?: string,
 ---     type?: tuple_type_name,
----     is_nullable?: boolean
+---     is_nullable?: boolean,
+---     nullable_action?: box.space.nullable_action,
+---     collation?: box.space.collation,
+---     constraint?: string | { [string]: string },
+---     foreign_key?: box.space.foreign_key | { [string]: box.space.foreign_key },
+---     default?: any,
+---     default_func?: string,
 ---} | [string, tuple_type_name]
 
 ---@alias box.space.format box.space.field_format[]

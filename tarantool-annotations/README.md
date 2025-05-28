@@ -259,6 +259,7 @@ For more information on using LSP refer to the [project's documentation](https:/
         + [x] `error`
         + [x] `index` (partial)
         + [x] `info`
+        + [x] `iproto`
         + [x] `schema` (partial, `func` is missing)
         + [x] `session`
         + [x] `slab`
@@ -289,14 +290,14 @@ For more information on using LSP refer to the [project's documentation](https:/
     - [x] `net.box` (partial)
     - [ ] `pickle`
     - [ ] `popen`
-    - [ ] `socket`
+    - [x] `socket`
     - [x] `strict`
     - [x] `string`
     - [ ] `tarantool`
     - [x] `uri`
     - [ ] `utf8`
     - [x] `uuid`
-    - [ ] `xlog`
+    - [x] `xlog`
     - [x] `yaml`
 
 * Popular Tarantool rocks
