@@ -2,7 +2,7 @@
   "name": "tarantool",
   "displayName": "Tarantool",
   "description": "Develop Tarantool applications with ease",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "icon": "res/icon.png",
   "repository": {
     "type": "git",
