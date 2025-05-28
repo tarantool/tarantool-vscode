@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 28.05.2025
+
 ### Added
 
 - A `tarantool.ttPath` configuration option can now be used to specify a path to
@@ -107,7 +109,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added jsonschema checks for Tarantool cluster configuration.
 - Added `tt` start and stop commands to the command palette.
 
-[unreleased]: https://github.com/tarantool/tarantool-vscode/compare/0.1.3...HEAD
+[unreleased]: https://github.com/tarantool/tarantool-vscode/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/tarantool/tarantool-vscode/compare/0.1.3...0.2.0
 [0.1.3]: https://github.com/tarantool/tarantool-vscode/compare/0.1.2...0.1.3
 [0.1.2]: https://github.com/tarantool/tarantool-vscode/compare/0.1.1...0.1.2
 [0.1.1]: https://github.com/tarantool/tarantool-vscode/compare/0.1.0...0.1.1
