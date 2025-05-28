@@ -357,8 +357,9 @@ box.tuple = {}
 ---
 ---@overload fun(...: tuple_type): box.tuple<any, any>
 ---@param value tuple_type[]
+---@param options? { format?: box.tuple.format|box.tuple.field_format[] }
 ---@return box.tuple<any, any> tuple
-function box.tuple.new(value) end
+function box.tuple.new(value, options) end
 
 ---Check whether a given object is a tuple cdata object.
 ---
@@ -369,3 +370,50 @@ function box.tuple.new(value) end
 ---@param object any
 ---@return boolean is_tuple returns true if given object is box.tuple
 function box.tuple.is(object) end
+
+---# Builtin `box.tuple.format` submodule
+box.tuple.format = {}
+
+---Tuple format.
+---
+---@class box.tuple.format: userdata
+local tuple_format = {}
+
+---@alias box.tuple.field_format box.space.field_format
+
+---Returns tuple format as a lua table.
+---
+---@return box.tuple.field_format[]
+function tuple_format:totable() end
+
+---Get a tuple_format iterator.
+---
+---In Lua, [`lua-table-value:pairs()`](https://www.lua.org/pil/7.3.html) is a method which returns: `function`, `lua-table-value`, `nil`.
+---
+---Tarantool has extended this so that `tuple_format:pairs()` returns: `function`, `tuple_format_field`, `nil`. It is useful for Lua iterators, because Lua iterators traverse a value's components until an end marker is reached.
+---
+---`tuple_format:ipairs()` is the same as `pairs()`, because tuple_format fields are always integers.
+---
+---@see box.tuple.format.ipairs
+---@return fun(tbl: any): (integer, box.tuple.field_format)
+function tuple_format:pairs() end
+
+---@see box.tuple.format.pairs
+tuple_format.ipairs = tuple_format.pairs
+
+---Get the format of a tuple.
+---
+---The resulting table lists the fields of a tuple (their names and types) if the format option was specified during the tuple creation. Otherwise, empty table is returned.
+---
+---@return box.tuple.field_format[] # the tuple format.
+function tuple_object:format() end
+
+---Create a new tuple format.
+---@param tuple_format box.tuple.field_format[]
+---@return box.tuple.format
+function box.tuple.format.new(tuple_format) end
+
+---Check whether a given object is a tuple_format userdata object.
+---@param object any
+---@return boolean is_tuple_format returns true if given object is box.tuple.format
+function box.tuple.format.is(object) end
