@@ -8,7 +8,7 @@
  <img src="https://avatars2.githubusercontent.com/u/2344919?v=2&s=100" align="right">
 </a>
 
-Tarantool VS Code Extension helps you to develop Tarantool applications in VS Code. It enhances your text editor with completions, suggestions, and snippets.
+Tarantool VS Code Extension helps you to develop Tarantool applications in VS Code. It enhances your text editor with completions, suggestions, snippets, and Lua debugger.
 
 ---
 
@@ -22,6 +22,7 @@ This extension offers the following features.
 * Cluster configuration schema validation for Tarantool 3.0+.
 * [tt cluster management utility](https://github.com/tarantool/tt) inside the command palette.
 * Other auxiliary commands, e.g. install Tarantool of a specific version right from VS Code.
+* Debugger for Tarantool apps, allowing breakpoints, step-by-step execution, viewing local variables and Lua code execution.
 
 ---
 
@@ -31,7 +32,6 @@ That's how you use this extension.
 
 * Install the extension from the VS Code marketplace.
 * Open a Tarantool project in VS Code.
-* Run `Tarantool: Initialize VS Code extension in existing app` command from the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS).
 
 You may statically type your Lua functions as follows.
 
@@ -53,6 +53,16 @@ local unnamed_user = { name = 'Unnamed' }
 ```
 
 For more examples, refer to [the examples folder](examples/) with tutorials on how to type your Lua code.
+
+## Using debugger
+
+Tarantool VS Code extension provides debugger facility for developing Tarantool applications. It employs EmmyLuaDebugger that is a stop-the-world Lua debugger.
+
+* Insert debugger code in Tarantool application by pressing `Ctrl+Shift+P` (or `Cmd+Shift+P` on MacOS) and running `Tarantool: Insert debugger code` command.
+* Start single Tarantool instance.
+* Press `F5` or run `Debug: Start debugging` command by pressing `Ctrl+Shift+P` (or `Cmd+Shift+P` on MacOS).
+* Choose `EmmyLua New Debugger` in the list. This debugging configuration would run automatically from now.
+* Set up breakpoints & access the Tarantool instance through `Debug console` in the bottom panel.
 
 ## Contributing
 
