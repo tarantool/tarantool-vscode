@@ -61,6 +61,10 @@
       {
         "command": "tarantool.install-ce",
         "title": "Tarantool: Install Tarantool Community Edition (tt)"
+      },
+      {
+        "command": "tarantool.debugger-code",
+        "title": "Tarantool: Insert debugger code"
       }
     ],
     "yamlValidation": [

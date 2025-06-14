@@ -115,6 +115,7 @@ export function activate(context: vscode.ExtensionContext) {
 		{ name: 'stat', cb: tt.stat },
 		{ name: 'restart', cb: tt.restart },
 		{ name: 'install-ce', cb: tt.installCe },
+		{ name: 'debugger-code', cb: utils.insertDebuggerCode },
 	];
 
 	commands.forEach((command) => {

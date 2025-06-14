@@ -25,7 +25,8 @@ const extensionConfig = {
   plugins: [
     new CopyWebpackPlugin({
       patterns: [
-        { from: './tarantool-annotations', to: path.resolve(__dirname, 'dist') }
+        { from: './tarantool-annotations', to: path.resolve(__dirname, 'dist') },
+        { from: './debugger', to: path.resolve(__dirname, 'dist') },
       ]
     })
   ],
